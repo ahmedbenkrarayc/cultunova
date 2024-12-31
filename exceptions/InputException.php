@@ -1,5 +1,5 @@
 <?php
 
-class EnvException extends Exception{
+class InputException extends Exception{
     
 }
