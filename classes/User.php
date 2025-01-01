@@ -13,6 +13,7 @@ class User{
     protected $createdAt;
     protected $updatedAt;
     protected $database;
+    protected $errors = [];
 
     public function __construct($id, $fname, $lname, $email, $password, $role, $createdAt, $updatedAt){
         try{
@@ -26,7 +27,7 @@ class User{
             $this->updatedAt = $updatedAt;
             $this->database = new Database();
         }catch(InputException $e){
-            echo $e->getMessage();
+            array_push($this->errors, $e->getMessage());
         }
     }
 
@@ -61,6 +62,12 @@ class User{
 
     public function getUpdatedAt(){
         return $this->updatedAt;
+    }
+
+    public function getErrors(){
+        $errors = $this->errors;
+        $this->errors = [];
+        return $errors;
     }
 
     //setters
@@ -108,16 +115,15 @@ class User{
 
     //methods
     public function login(){
-        $errors = [];
         try{
             if($this->email == null){
-                array_push($errors, 'Email must have a value !');
-                return ['success' => false, 'errors' => $errors];
+                array_push($this->errors, 'Email must have a value !');
+                return ['success' => false, 'errors' => $this->errors];
             }
             
             if($this->password == null){
-                array_push($errors, 'Password must have a value !');
-                return ['success' => false, 'errors' => $errors];
+                array_push($this->errors, 'Password must have a value !');
+                return ['success' => false, 'errors' => $this->errors];
             }
     
             $connection = $this->database->getConnection();
@@ -133,31 +139,31 @@ class User{
                     //correct password
                     setcookie('user_id', $user['id'], time() + 24 * 60 * 60, '/');
                     setcookie('user_role', $user['role'], time() + 24 * 60 * 60, '/');
-                    return ['success' => true, 'errors' => $errors];
+                    return true;
                 }else{
                     //wrong password
-                    array_push($errors, 'Wrong password !');
-                    return ['success' => false, 'errors' => $errors];
+                    array_push($this->errors, 'Wrong password !');
+                    return false;
                 }
             }else{
                 //email notfound
-                array_push($errors, 'We have no user with this email !');
-                return ['success' => false, 'errors' => $errors];
+                array_push($this->errors, 'We have no user with this email !');
+                return false;
             }
         }catch(PDOException $e){
             echo $e->getMessage();
-            array_push($errors, 'Something went wrong !');
-            return ['success' => false, 'errors' => $errors];
+            array_push($this->errors, 'Something went wrong !');
+            return false;
         }
     }
 
     public function logout(){
         setcookie('user_id', '', time() - 60 * 60, '/');
         setcookie('user_role', '', time() - 60 * 60, '/');
-        header('Location : '.$_SERVER['PHP_SELF']);
+        header('Location: '.$_SERVER['PHP_SELF']);
     }
 
-    public static function verifyAuth(){
+    public static function verifyAuth($role){
         if(isset($_COOKIE['user_id']) && isset($_COOKIE['user_role'])){
             return $_COOKIE['user_role'] == $role;
         }
