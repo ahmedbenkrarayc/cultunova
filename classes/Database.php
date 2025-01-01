@@ -19,9 +19,9 @@ class Database{
                 ]
             );
         }catch(EnvException $e){
-            echo "Error : " . $e->getMessage();
+            echo $e->getMessage();
         }catch(PDOException $e){
-            echo "Error : " . $e->getMessage();
+            echo $e->getMessage();
         }
     }
 
