@@ -156,4 +156,12 @@ class User{
         setcookie('user_role', '', time() - 60 * 60, '/');
         header('Location : '.$_SERVER['PHP_SELF']);
     }
+
+    public static function verifyAuth(){
+        if(isset($_COOKIE['user_id']) && isset($_COOKIE['user_role'])){
+            return $_COOKIE['user_role'] == $role;
+        }
+    
+        return false;
+    }
 }
