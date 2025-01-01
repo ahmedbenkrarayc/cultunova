@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__.'/User.php';
+require_once __DIR__.'/../exceptions/InputException.php';
 
 class Author extends User{
     private $deleted;
@@ -9,9 +10,13 @@ class Author extends User{
 
     public function __construct($id, $fname, $lname, $email, $password, $createdAt, $updatedAt, $picture, $cover, $deleted){
         parent::__construct($id, $fname, $lname, $email, $password, 'author', $createdAt, $updatedAt);
-        $this->setPicture($picture);
-        $this->setCover($cover);
-        $this->setDeleted($deleted);
+        try{
+            $this->setPicture($picture);
+            $this->setCover($cover);
+            $this->setDeleted($deleted);
+        }catch(InputException $e){
+            echo $e->getMessage();
+        }
     }
 
     //getters
@@ -29,6 +34,9 @@ class Author extends User{
 
     //setters
     public function setDeleted($deleted){
+        if($deleted != null)
+            if($deleted != 0 && $deleted != 1)
+                throw new InputException('Deleted value must either be a 0 or 1 !');
         $this->deleted = $deleted;
     }
 
