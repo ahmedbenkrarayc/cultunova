@@ -116,15 +116,19 @@ class User{
     //methods
     public function login(){
         try{
+            $nullvalue = false;
             if($this->email == null){
                 array_push($this->errors, 'Email must have a value !');
-                return ['success' => false, 'errors' => $this->errors];
+                $nullvalue = true;
             }
             
             if($this->password == null){
                 array_push($this->errors, 'Password must have a value !');
-                return ['success' => false, 'errors' => $this->errors];
+                $nullvalue = true;
             }
+
+            if($nullvalue)
+                return false;
     
             $connection = $this->database->getConnection();
             $query = 'SELECT id, role, password FROM user WHERE email = :email';
