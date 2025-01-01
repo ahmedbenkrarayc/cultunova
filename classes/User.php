@@ -26,7 +26,7 @@ class User{
             $this->updatedAt = $updatedAt;
             $this->database = new Database();
         }catch(InputException $e){
-            echo "Error : " . $e->getMessage();
+            echo $e->getMessage();
         }
     }
 
