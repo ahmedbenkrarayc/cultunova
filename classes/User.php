@@ -149,6 +149,11 @@ class User{
             array_push($errors, 'Something went wrong !');
             return ['success' => false, 'errors' => $errors];
         }
+    }
 
+    public function logout(){
+        setcookie('user_id', '', time() - 60 * 60, '/');
+        setcookie('user_role', '', time() - 60 * 60, '/');
+        header('Location : '.$_SERVER['PHP_SELF']);
     }
 }
