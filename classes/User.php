@@ -105,4 +105,50 @@ class User{
                 throw new InputException('Role can only be admin, visitor or author !');
         $this->role = $role;
     }
+
+    //methods
+    public function login(){
+        $errors = [];
+        try{
+            if($this->email == null){
+                array_push($errors, 'Email must have a value !');
+                return ['success' => false, 'errors' => $errors];
+            }
+            
+            if($this->password == null){
+                array_push($errors, 'Password must have a value !');
+                return ['success' => false, 'errors' => $errors];
+            }
+    
+            $connection = $this->database->getConnection();
+            $query = 'SELECT id, role, password FROM user WHERE email = :email';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':email', $this->email, PDO::PARAM_STR);
+            $stmt->execute();
+            $user = $stmt->fetch();
+
+            if($user){
+                //email found
+                if(password_verify($this->password, $user['password'])){
+                    //correct password
+                    setcookie('user_id', $user['id'], time() + 24 * 60 * 60, '/');
+                    setcookie('user_role', $user['role'], time() + 24 * 60 * 60, '/');
+                    return ['success' => true, 'errors' => $errors];
+                }else{
+                    //wrong password
+                    array_push($errors, 'Wrong password !');
+                    return ['success' => false, 'errors' => $errors];
+                }
+            }else{
+                //email notfound
+                array_push($errors, 'We have no user with this email !');
+                return ['success' => false, 'errors' => $errors];
+            }
+        }catch(PDOException $e){
+            echo $e->getMessage();
+            array_push($errors, 'Something went wrong !');
+            return ['success' => false, 'errors' => $errors];
+        }
+
+    }
 }
