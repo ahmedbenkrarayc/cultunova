@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/../classes/Database.php';
 require_once __DIR__.'/../classes/User.php';
+require_once __DIR__.'/../utils/Logger.php';
 
 trait Register{
     public function register(User $user){
@@ -36,32 +37,25 @@ trait Register{
             if($nullable)
                 return ['success' => false, 'errors' => $errors];
     
-            $connection = $database->getConnection();
-            $query = 'SELECT id, role, password FROM user WHERE email = :email';
-            $stmt = $connection->prepare($query);
-            $stmt->bindValue(':email', $this->email, PDO::PARAM_STR);
-            $stmt->execute();
-            $user = $stmt->fetch();
+            $hashedPassword = password_hash($user->password, PASSWORD_DEFAULT);
 
-            if($user){
-                //email found
-                if(password_verify($this->password, $user['password'])){
-                    //correct password
-                    setcookie('user_id', $user['id'], time() + 24 * 60 * 60, '/');
-                    setcookie('user_role', $user['role'], time() + 24 * 60 * 60, '/');
-                    return ['success' => true, 'errors' => $errors];
-                }else{
-                    //wrong password
-                    array_push($errors, 'Wrong password !');
-                    return ['success' => false, 'errors' => $errors];
-                }
-            }else{
-                //email notfound
-                array_push($errors, 'We have no user with this email !');
-                return ['success' => false, 'errors' => $errors];
+            $connection = $database->getConnection();
+            $query = 'INSERT INTO user(fname, lname, email, password, role) VALUES(:fname, :lname, :email, :password, :role)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':fname', $user->fname, PDO::PARAM_STR);
+            $stmt->bindValue(':lname', $user->lname, PDO::PARAM_STR);
+            $stmt->bindValue(':email', $user->email, PDO::PARAM_STR);
+            $stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+            $stmt->bindValue(':role', $user->role, PDO::PARAM_STR);
+            
+            if($stmt->execute()){
+                return ['success' => true, 'errors' => []];
             }
+
+            array_push($errors, 'Something went wrong !');
+            return ['success' => false, 'errors' => $errors];
         }catch(PDOException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
             array_push($errors, 'Something went wrong !');
             return ['success' => false, 'errors' => $errors];
         }
