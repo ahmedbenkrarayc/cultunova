@@ -283,4 +283,27 @@ class Article {
             return false;
         }
     }
+
+    public function delete(){
+        try{
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'DELETE FROM article WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
 }
