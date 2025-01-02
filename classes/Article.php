@@ -213,4 +213,74 @@ class Article {
             return false;
         }
     }
+
+    public function update(){
+        try{
+            $nullvalue = false;
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->title == null){
+                array_push($this->errors, 'Title is required !');
+                $nullvalue = true;
+            }
+
+            if($this->description == null){
+                array_push($this->errors, 'Description is required !');
+                $nullvalue = true;
+            }
+
+            if($this->content == null){
+                array_push($this->errors, 'Content is required !');
+                $nullvalue = true;
+            }
+
+            if($this->cover == null){
+                array_push($this->errors, 'Cover is required !');
+                $nullvalue = true;
+            }
+
+            if($this->category_id == null){
+                array_push($this->errors, 'Category is required !');
+                $nullvalue = true;
+            }
+
+            if($this->author_id == null){
+                array_push($this->errors, 'Author is required !');
+                $nullvalue = true;
+            }
+
+            if($this->status == null){
+                array_push($this->errors, 'Status is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = $this->database->getConnection();
+            $query = 'UPDATE article SET title = :title, description = :description, content = :content, cover = :cover, category_id = :category_id, author_id = :author_id, status = :status WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->bindValue(':title', $this->title, PDO::PARAM_STR);
+            $stmt->bindValue(':description', $this->description, PDO::PARAM_STR);
+            $stmt->bindValue(':content', $this->content, PDO::PARAM_STR);
+            $stmt->bindValue(':cover', $this->cover, PDO::PARAM_STR);
+            $stmt->bindValue(':category_id', $this->category_id, PDO::PARAM_INT);
+            $stmt->bindValue(':author_id', $this->author_id, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $this->status, PDO::PARAM_STR);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
 }
