@@ -82,4 +82,39 @@ class Category{
             return false;
         }
     }
+
+    public function update(){
+        try{
+            $nullvalue = false;
+
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->name == null){
+                array_push($this->errors, 'Category name is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = $this->database->getConnection();
+            $query = 'update category set name = :name where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':name', $this->name, PDO::PARAM_STR);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            echo $e->getMessage();
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
 }
