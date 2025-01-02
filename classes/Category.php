@@ -46,16 +46,23 @@ class Category{
 
     //setters
     public function setId($id){
-        if($id != null)
+        if($id != null){
             if(!filter_var($id, FILTER_VALIDATE_INT))
                 throw new InputException('Id must be a number !');
+
+            if($id < 1)
+                throw new InputException('Id must be a positive number greater than 0 !');
+        }
         $this->id = $id;
     }
 
     public function setName($name){
-        if($name != null)
+        if($name != null){
             if(!is_string($name))
                 throw new InputException('Category name must be a string !');
+            if(strlen(trim($name)) < 3)
+                throw new InputException('Category name should at least contain 3 characters !');
+        }
         $this->name = $name;
     }
 
