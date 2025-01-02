@@ -76,7 +76,7 @@ class Category{
             $connection =  $this->database->getConnection();
             $query = 'insert into category(name) values(:name)';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':name', $this->name, PDO::PARAM_STR);
+            $stmt->bindValue(':name', htmlspecialchars($this->name), PDO::PARAM_STR);
             if($stmt->execute()){
                 return true;
             }
@@ -110,8 +110,8 @@ class Category{
             $connection = $this->database->getConnection();
             $query = 'update category set name = :name where id = :id';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':name', $this->name, PDO::PARAM_STR);
-            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->bindValue(':name', htmlspecialchars($this->name), PDO::PARAM_STR);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             if($stmt->execute()){
                 return true;
             }
@@ -135,7 +135,7 @@ class Category{
             $connection = $this->database->getConnection();
             $query = 'delete from category where id = :id';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             if($stmt->execute()){
                 return true;
             }
