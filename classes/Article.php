@@ -294,6 +294,7 @@ class Article {
             $connection = $this->database->getConnection();
             $query = 'DELETE FROM article WHERE id = :id';
             $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
             if($stmt->execute()){
                 return true;
             }
@@ -304,6 +305,21 @@ class Article {
             Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return false;
+        }
+    }
+
+    public function getAll(){
+        try{
+            $connection = $this->database->getConnection();
+            $query = 'SELECT * FROM article';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
         }
     }
 }
