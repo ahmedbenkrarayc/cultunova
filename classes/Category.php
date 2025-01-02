@@ -117,4 +117,42 @@ class Category{
             return false;
         }
     }
+
+    public function delete(){
+        try{
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'delete from category where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            echo $e->getMessage();
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
+
+    public function categoryList(){
+        try{
+            $connection = $this->database->getConnection();
+            $query = 'select * from category';
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            echo $e->getMessage();
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
 }
