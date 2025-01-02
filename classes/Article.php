@@ -10,6 +10,8 @@ class Article {
     private $content;
     private $cover;
     private $status;
+    private $category_id;
+    private $author_id;
     private $createdAt;
     private $updatedAt;
     private $database;
@@ -54,6 +56,14 @@ class Article {
 
     public function getStatus(){
         return $this->status;
+    }
+
+    public function getAuthorId(){
+        return $this->author_id;
+    }
+
+    public function getCategoryId(){
+        return $this->category_id;
     }
 
     public function getCreatedAt(){
@@ -118,8 +128,89 @@ class Article {
 
     public function setStatus($status){
         if($status != null)
-            if($status != 0 && $status != 1)
-                throw new InputException('Status value must either be a 0 or 1 !');
+            if($status != 'accepted' && $status != 'in review' && $status != 'rejected')
+                throw new InputException('Status value must either be accepted, in review or rejected !');
         $this->status = $status;
+    }
+
+    public function setAuthorId($author_id){
+        if($author_id != null){
+            if(!filter_var($author_id, FILTER_VALIDATE_INT))
+                throw new InputException('Author Id must be a number !');
+
+            if($author_id < 1)
+                throw new InputException('Author Id must be a positive number greater than 0 !');
+        }
+        $this->author_id = $author_id;
+    }
+
+    public function setCategoryId($category_id){
+        if($category_id != null){
+            if(!filter_var($category_id, FILTER_VALIDATE_INT))
+                throw new InputException('Category Id must be a number !');
+
+            if($category_id < 1)
+                throw new InputException('Category Id must be a positive number greater than 0 !');
+        }
+        $this->category_id = $category_id;
+    }
+
+    //methods
+    public function create(){
+        try{
+            $nullvalue = false;
+            if($this->title == null){
+                array_push($this->errors, 'Title is required !');
+                $nullvalue = true;
+            }
+
+            if($this->description == null){
+                array_push($this->errors, 'Description is required !');
+                $nullvalue = true;
+            }
+
+            if($this->content == null){
+                array_push($this->errors, 'Content is required !');
+                $nullvalue = true;
+            }
+
+            if($this->cover == null){
+                array_push($this->errors, 'Cover is required !');
+                $nullvalue = true;
+            }
+
+            if($this->category_id == null){
+                array_push($this->errors, 'Category is required !');
+                $nullvalue = true;
+            }
+
+            if($this->author_id == null){
+                array_push($this->errors, 'Author is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = $this->database->getConnection();
+            $query = 'INSERT INTO article(title, description, content, cover, category_id, author_id) values(:title, :description, :content, :cover, :category_id, :author_id)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':title', $this->title, PDO::PARAM_STR);
+            $stmt->bindValue(':description', $this->description, PDO::PARAM_STR);
+            $stmt->bindValue(':content', $this->content, PDO::PARAM_STR);
+            $stmt->bindValue(':cover', $this->cover, PDO::PARAM_STR);
+            $stmt->bindValue(':category_id', $this->category_id, PDO::PARAM_INT);
+            $stmt->bindValue(':author_id', $this->author_id, PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
     }
 }
