@@ -29,6 +29,7 @@ class User{
             $this->database = new Database();
         }catch(InputException $e){
             array_push($this->errors, $e->getMessage());
+            echo $e->getMessage();
         }
     }
 
@@ -73,23 +74,35 @@ class User{
 
     //setters
     public function setId($id){
-        if($id != null)
+        if($id != null){
             if(!filter_var($id, FILTER_VALIDATE_INT))
                 throw new InputException('Id must be a number !');
+
+            if($id < 1)
+                throw new InputException('Id must be a positive number greater than 0 !');
+        }
         $this->id = $id;
     }
 
     public function setFname($fname){
-        if($fname != null)
+        if($fname != null){
             if(!is_string($fname))
                 throw new InputException('First name must be a string !');
+
+            if(strlen(trim($fname)) < 3)
+                throw new InputException('First name must contain at least 3 characters !');
+        }
         $this->fname = $fname;
     }
 
     public function setLname($lname){
-        if($lname != null)
+        if($lname != null){
             if(!is_string($lname))
                 throw new InputException('Last name must be a string !');
+
+            if(strlen(trim($lname)) < 3)
+                throw new InputException('Last name must be a string !');
+        }
         $this->lname = $lname;
     }
 
