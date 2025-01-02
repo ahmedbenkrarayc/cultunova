@@ -2,8 +2,12 @@
 
 require_once __DIR__.'/User.php';
 require_once __DIR__.'/../exceptions/InputException.php';
+require_once __DIR__.'/IRegistrable.php';
+require_once __DIR__.'/../traits/Register.php';
 
-class Author extends User{
+class Author extends User implements IRegistrable{
+    use Register;
+    
     private $deleted;
     private $picture;
     private $cover;
