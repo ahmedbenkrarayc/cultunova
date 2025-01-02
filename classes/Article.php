@@ -72,30 +72,43 @@ class Article {
 
     //setters
     public function setId($id){
-        if($id != null)
+        if($id != null){
             if(!filter_var($id, FILTER_VALIDATE_INT))
                 throw new InputException('Id must be a number !');
+
+            if($id < 1)
+                throw new InputException('Id must be a positive number greater than 0 !');
+        }
         $this->id = $id;
     }
 
     public function setTitle($title){
-        if($title != null)
+        if($title != null){
             if(!is_string($title))
                 throw new InputException('Title must be a string !');
+            if(strlen(trim($title)))
+                throw new InputException('Title should at least contain 3 characters !');
+        }
         $this->title = $title;
     }
 
     public function setDescription($description){
-        if($description != null)
+        if($description != null){
             if(!is_string($description))
                 throw new InputException('Description must be a string !');
+            if(strlen(trim($description)))
+                throw new InputException('Description should at least contain 100 characters !');
+        }
         $this->description = $description;
     }
 
     public function setContent($content){
-        if($content != null)
+        if($content != null){
             if(!is_string($content))
                 throw new InputException('Content must be a string !');
+            if(strlen(trim($content)) < 200)
+                throw new InputException('Content should at least contain 200 characters !');
+        }
         $this->content = $content;
     }
 
