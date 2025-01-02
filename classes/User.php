@@ -2,6 +2,7 @@
 
 require_once __DIR__.'/Database.php';
 require_once __DIR__.'/../exceptions/InputException.php';
+require_once __DIR__.'/../utils/Logger.php';
 
 class User{
     protected $id;
@@ -155,7 +156,7 @@ class User{
                 return false;
             }
         }catch(PDOException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return false;
         }
