@@ -147,7 +147,7 @@ class User{
             $connection = $this->database->getConnection();
             $query = 'SELECT id, role, password FROM user WHERE email = :email';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':email', $this->email, PDO::PARAM_STR);
+            $stmt->bindValue(':email', htmlspecialchars($this->email), PDO::PARAM_STR);
             $stmt->execute();
             $user = $stmt->fetch();
 
