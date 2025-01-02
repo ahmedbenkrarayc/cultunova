@@ -313,6 +313,25 @@ class Article {
             $connection = $this->database->getConnection();
             $query = 'SELECT * FROM article';
             $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
+
+    public function getOne(){
+        try{
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT * FROM article WHERE id = :id';
+            $stmt = $connection->prepare($query);
             $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
