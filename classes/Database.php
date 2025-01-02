@@ -2,6 +2,7 @@
 
 require_once __DIR__.'/../env.php';
 require_once __DIR__.'/../exceptions/EnvException.php';
+require_once __DIR__.'/../utils/Logger.php';
 
 class Database{
     private $connection;
@@ -19,9 +20,9 @@ class Database{
                 ]
             );
         }catch(EnvException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
         }catch(PDOException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
         }
     }
 
