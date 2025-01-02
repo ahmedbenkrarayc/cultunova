@@ -195,12 +195,12 @@ class Article {
             $connection = $this->database->getConnection();
             $query = 'INSERT INTO article(title, description, content, cover, category_id, author_id) values(:title, :description, :content, :cover, :category_id, :author_id)';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':title', $this->title, PDO::PARAM_STR);
-            $stmt->bindValue(':description', $this->description, PDO::PARAM_STR);
-            $stmt->bindValue(':content', $this->content, PDO::PARAM_STR);
-            $stmt->bindValue(':cover', $this->cover, PDO::PARAM_STR);
-            $stmt->bindValue(':category_id', $this->category_id, PDO::PARAM_INT);
-            $stmt->bindValue(':author_id', $this->author_id, PDO::PARAM_INT);
+            $stmt->bindValue(':title', htmlspecialchars($this->title), PDO::PARAM_STR);
+            $stmt->bindValue(':description', htmlspecialchars($this->description), PDO::PARAM_STR);
+            $stmt->bindValue(':content', htmlspecialchars($this->content), PDO::PARAM_STR);
+            $stmt->bindValue(':cover', htmlspecialchars($this->cover), PDO::PARAM_STR);
+            $stmt->bindValue(':category_id', htmlspecialchars($this->category_id), PDO::PARAM_INT);
+            $stmt->bindValue(':author_id', htmlspecialchars($this->author_id), PDO::PARAM_INT);
             if($stmt->execute()){
                 return true;
             }
@@ -263,14 +263,14 @@ class Article {
             $connection = $this->database->getConnection();
             $query = 'UPDATE article SET title = :title, description = :description, content = :content, cover = :cover, category_id = :category_id, author_id = :author_id, status = :status WHERE id = :id';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
-            $stmt->bindValue(':title', $this->title, PDO::PARAM_STR);
-            $stmt->bindValue(':description', $this->description, PDO::PARAM_STR);
-            $stmt->bindValue(':content', $this->content, PDO::PARAM_STR);
-            $stmt->bindValue(':cover', $this->cover, PDO::PARAM_STR);
-            $stmt->bindValue(':category_id', $this->category_id, PDO::PARAM_INT);
-            $stmt->bindValue(':author_id', $this->author_id, PDO::PARAM_INT);
-            $stmt->bindValue(':status', $this->status, PDO::PARAM_STR);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->bindValue(':title', htmlspecialchars($this->title), PDO::PARAM_STR);
+            $stmt->bindValue(':description', htmlspecialchars($this->description), PDO::PARAM_STR);
+            $stmt->bindValue(':content', htmlspecialchars($this->content), PDO::PARAM_STR);
+            $stmt->bindValue(':cover', htmlspecialchars($this->cover), PDO::PARAM_STR);
+            $stmt->bindValue(':category_id', htmlspecialchars($this->category_id), PDO::PARAM_INT);
+            $stmt->bindValue(':author_id', htmlspecialchars($this->author_id), PDO::PARAM_INT);
+            $stmt->bindValue(':status', htmlspecialchars($this->status), PDO::PARAM_STR);
             if($stmt->execute()){
                 return true;
             }
@@ -294,7 +294,7 @@ class Article {
             $connection = $this->database->getConnection();
             $query = 'DELETE FROM article WHERE id = :id';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             if($stmt->execute()){
                 return true;
             }
@@ -332,7 +332,7 @@ class Article {
             $connection = $this->database->getConnection();
             $query = 'SELECT * FROM article WHERE id = :id';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
         }catch(PDOException $e){
