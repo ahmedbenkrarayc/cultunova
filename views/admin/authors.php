@@ -75,7 +75,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+            </div>
           </div>
         </div>
         <?php require_once './../../utils/__footer.php' ?>
