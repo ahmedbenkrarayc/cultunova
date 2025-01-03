@@ -45,7 +45,7 @@
                 <form>
                   <div class="subheader mb-2">Find article</div>
                   <div class="mb-2">
-                    <input type="text" name="" class="form-control">
+                    <input type="text" placeholder="search ..." name="" class="form-control">
                   </div>
                   <div class="subheader mb-2">Category</div>
                   <div class="mb-2">
