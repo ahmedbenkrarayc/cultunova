@@ -29,7 +29,6 @@ class User{
             $this->database = new Database();
         }catch(InputException $e){
             array_push($this->errors, $e->getMessage());
-            echo $e->getMessage();
         }
     }
 
