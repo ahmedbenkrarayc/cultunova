@@ -24,6 +24,12 @@ window.validateForm = (inputs) => {
         if(!range.includes(value.toLowerCase())){
             errors.push(`${name} must be one of these values ${range.join(', ')}.`)
         }
+      }else if(type === "image"){
+        if(!value){
+          errors.push(`${name} is required and must be an image.`)
+        }else if(!/\.(jpg|jpeg|png|gif|bmp)$/i.test(value)) {
+          errors.push(`${name} must be a valid image file (jpg, jpeg, png, gif, bmp).`)
+        }
       }
     })
   
