@@ -25,36 +25,36 @@
     <script src="./../../dist/js/demo-theme.min.js?1692870487"></script>
     <div class="page page-center">
       <div class="container container-tight py-4">
-          <!-- <div class="alert alert-danger" role="alert" style="background: white;">
+          <div id="errors" class="alert alert-danger" role="alert" style="background: white; display: none;">
               <ul>
-                  <li>erro1</li>
+                
               </ul>
-          </div> -->
+          </div>
         <div class="card card-md">
           <div class="card-body">
             <h2 class="h2 text-center mb-4">Create new account</h2>
-            <form action="./../../" method="get" autocomplete="off" novalidate>
+            <form action="" method="post" id="form">
               <div class="mb-3">
                 <label class="form-label">First name</label>
-                <input type="text" class="form-control" placeholder="first name" name="fname" autocomplete="off">
+                <input type="text" id="fname" class="form-control" placeholder="first name" name="fname">
               </div>
               <div class="mb-3">
                 <label class="form-label">Last name</label>
-                <input type="text" class="form-control" placeholder="last name" name="lname" autocomplete="off">
+                <input type="text" class="form-control" placeholder="last name" name="lname" id="lname">
               </div>
               <div class="mb-3">
                 <label class="form-label">Email address</label>
-                <input type="email" class="form-control" placeholder="your@email.com" name="email" autocomplete="off">
+                <input type="email" class="form-control" placeholder="your@email.com" name="email" id="email">
               </div>
               <div class="mb-2">
                 <label class="form-label">Password</label>
                 <div class="input-group input-group-flat">
-                  <input type="password" class="form-control"  placeholder="Your password" name="password" autocomplete="off">
+                  <input type="password" class="form-control"  placeholder="Your password" name="password" id="password">
                 </div>
               </div>
               <div class="mb-3">
                 <label class="form-label">Role</label>
-                <select class="form-select" name="role">
+                <select class="form-select" name="role" id="role">
                   <option value="visitor">Visitor</option>
                   <option value="author">Author</option>
                 </select>
@@ -73,6 +73,7 @@
     <!-- Libs JS -->
     <!-- Tabler Core -->
     <script src="./../../assets/js/validation.js"></script>
+    <script src="./../../assets/js/signup.js"></script>
     <script src="./../../dist/js/tabler.min.js?1692870487" defer></script>
     <script src="./../../dist/js/demo.min.js?1692870487" defer></script>
   </body>
