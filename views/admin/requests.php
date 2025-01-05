@@ -1,6 +1,6 @@
 <?php 
 require_once './../../classes/Article.php';
-$article = new Article(null, null, null, null, null, null, null, null);
+$article = new Article(null, null, null, null, null, null, null, null, null, null);
 $articles = $article->getAll() ?? [] ;
 
 ?>
@@ -65,20 +65,20 @@ $articles = $article->getAll() ?? [] ;
                     </thead>
                     <tbody class="table-tbody">
                       <?php 
-                      foreach($articles as $index => $item ){
-                        if($item['status'] == 'in review'){
-                          echo `
+                      foreach($articles as $index => $item) {
+                        if($item['status'] == 'in review') {
+                          echo '
                             <tr>
-                              <td class="sort-name">`.$index.`</td>
-                              <td class="sort-city">`.$item['title'].`</td>
-                              <td class="sort-type">`.$item['description'].`</td>
-                              <td class="sort-score">`.$item['createdAt'].`</td>
-                              <td class="sort-score">`.$item['updatedAt'].`</td>
+                              <td class="sort-name">'.($index+1).'</td>
+                              <td class="sort-city">'.$item['title'].'</td>
+                              <td class="sort-type">'.$item['description'].'</td>
+                              <td class="sort-score">'.explode(' ',$item['createdAt'])[0].'</td>
+                              <td class="sort-score">'.explode(' ',$item['updatedAt'])[0].'</td>
                               <td class="sort-date">
-                                  <a href="./../author/article.php?id=`.$item['id'].`">details</a>
+                                  <a href="./../author/article.php?id='.$item['id'].'">details</a>
                               </td>
                             </tr>
-                          `;
+                          ';
                         }
                       }
                       ?>
