@@ -36,6 +36,16 @@ trait Register{
 
             if($nullable)
                 return ['success' => false, 'errors' => $errors];
+
+            $emailCheckQuery = 'SELECT COUNT(*) FROM user WHERE email = :email';
+            $emailCheckStmt = $connection->prepare($emailCheckQuery);
+            $emailCheckStmt->bindValue(':email', $user->getEmail(), PDO::PARAM_STR);
+            $emailCheckStmt->execute();
+
+            if ($emailCheckStmt->fetchColumn() > 0) {
+                array_push($errors, 'Email already exists!');
+                return ['success' => false, 'errors' => $errors];
+            }
     
             $hashedPassword = password_hash($user->password, PASSWORD_DEFAULT);
 
