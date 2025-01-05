@@ -1,3 +1,25 @@
+<?php 
+require_once './../../classes/Category.php';
+require_once './../../exceptions/InputException.php';
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+  $category = new Category(null, $_POST['name'], null, null);
+
+  $errors = $category->getErrors();
+  if(count($errors) == 0){
+    try{
+      if(!$category->create()){
+        $errors = $category->getErrors();
+      }else{
+        $success = true;
+      }
+    }catch(InputException $e){
+      $errors[] = $e->getMessage();
+    }
+  }
+}
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -28,13 +50,24 @@
         <?php require_once './../../utils/__header.php' ?>
         <div class="page-wrapper">
         <div style="margin-inline: auto; width: 80%; margin-top: 50px;">
-            <div class="alert alert-danger" role="alert" style="background: white;">
-                <ul>
-                    <li>erro1</li>
-                </ul>
+            <div id="errors" class="alert alert-danger" role="alert" style="background: white; display: none;">
+                <ul></ul>
             </div>
-            <div class="alert alert-success" role="alert" style="background: white;">Created successfully</div>
-            <form class="card">
+            <?php if(isset($errors) && count($errors) > 0): ?>
+              <div class="alert alert-danger" role="alert" style="background: white;">
+                  <ul>
+                    <?php
+                      foreach($errors as $error){
+                        echo '<li>'.$error.'</li>';
+                      }
+                    ?>
+                  </ul>
+              </div>
+            <?php endif; ?>
+            <?php if(isset($success) && $success): ?>
+              <div class="alert alert-success" role="alert" style="background: white;">Created successfully</div>
+            <?php endif; ?>
+            <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST" class="card" id="form">
                 <div class="card-header">
                   <h3 class="card-title">Create category</h3>
                 </div>
@@ -42,7 +75,7 @@
                   <div class="mb-3">
                     <label class="form-label required">Category name</label>
                     <div>
-                      <input type="text" class="form-control" placeholder="Enter category" name="name">
+                      <input type="text" class="form-control" placeholder="Enter category" name="name" id="name">
                     </div>
                   </div>
                 </div>
@@ -55,6 +88,8 @@
         <?php require_once './../../utils/__footer.php' ?>
       </div>
     </div>
+    <script src="./../../assets/js/validation.js"></script>
+    <script src="./../../assets/js/admin/addcategory.js"></script>
     <!-- Libs JS -->
     <script src="./../../dist/libs/list.js/dist/list.min.js?1692870487" defer></script>
     <!-- Tabler Core -->
