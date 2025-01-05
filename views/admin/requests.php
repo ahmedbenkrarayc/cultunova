@@ -1,10 +1,17 @@
+<?php 
+require_once './../../classes/Article.php';
+$article = new Article(null, null, null, null, null, null, null, null);
+$articles = $article->getAll() ?? [] ;
+
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Categories | Cultunova</title>
+    <title>Article posting requests | Cultunova</title>
     <!-- CSS files -->
     <link href="./../../dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
     <link href="./../../dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
@@ -57,16 +64,24 @@
                       </tr>
                     </thead>
                     <tbody class="table-tbody">
-                      <tr>
-                        <td class="sort-name">1</td>
-                        <td class="sort-city">Cedar Point</td>
-                        <td class="sort-type">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years</td>
-                        <td class="sort-score">100,0%</td>
-                        <td class="sort-score">100,0%</td>
-                        <td class="sort-date">
-                            <a href="#">details</a>
-                        </td>
-                      </tr>
+                      <?php 
+                      foreach($articles as $index => $item ){
+                        if($item['status'] == 'in review'){
+                          echo `
+                            <tr>
+                              <td class="sort-name">`.$index.`</td>
+                              <td class="sort-city">`.$item['title'].`</td>
+                              <td class="sort-type">`.$item['description'].`</td>
+                              <td class="sort-score">`.$item['createdAt'].`</td>
+                              <td class="sort-score">`.$item['updatedAt'].`</td>
+                              <td class="sort-date">
+                                  <a href="./../author/article.php?id=`.$item['id'].`">details</a>
+                              </td>
+                            </tr>
+                          `;
+                        }
+                      }
+                      ?>
                     </tbody>
                   </table>
                 </div>
