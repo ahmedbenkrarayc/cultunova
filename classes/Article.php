@@ -17,7 +17,7 @@ class Article {
     private $database;
     private $errors = [];
 
-    public function __construct($id, $title, $description, $content, $cover, $status, $createdAt, $updatedAt){
+    public function __construct($id, $title, $description, $content, $cover, $status, $category, $author, $createdAt, $updatedAt){
         try{
             $this->setId($id);
             $this->setTitle($title);
@@ -25,6 +25,8 @@ class Article {
             $this->setContent($content);
             $this->setCover($cover);
             $this->setStatus($status);
+            $this->setCategoryId($category);
+            $this->setAuthorId($author);
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
             $this->database = new Database();
@@ -96,7 +98,7 @@ class Article {
         if($title != null){
             if(!is_string($title))
                 throw new InputException('Title must be a string !');
-            if(strlen(trim($title)))
+            if(strlen(trim($title)) <3)
                 throw new InputException('Title should at least contain 3 characters !');
         }
         $this->title = $title;
@@ -106,7 +108,7 @@ class Article {
         if($description != null){
             if(!is_string($description))
                 throw new InputException('Description must be a string !');
-            if(strlen(trim($description)))
+            if(strlen(trim($description)) < 100)
                 throw new InputException('Description should at least contain 100 characters !');
         }
         $this->description = $description;
