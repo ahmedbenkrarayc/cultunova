@@ -5,7 +5,6 @@ require_once __DIR__.'/../utils/Logger.php';
 
 trait Register{
     public function register(){
-        $database = new Database();
         $nullvalue = false;
         $errors = [];
         try{
@@ -15,7 +14,7 @@ trait Register{
             }
 
             if($this->getLname() == null){
-                array_push($errors, 'First name is required !');
+                array_push($errors, 'Last name is required !');
                 $nullvalue = true;
             }
 
@@ -34,9 +33,10 @@ trait Register{
                 $nullvalue = true;
             }
 
-            if($nullable)
+            if($nullvalue)
                 return ['success' => false, 'errors' => $errors];
 
+            $connection = $this->database->getConnection();
             $emailCheckQuery = 'SELECT COUNT(*) FROM user WHERE email = :email';
             $emailCheckStmt = $connection->prepare($emailCheckQuery);
             $emailCheckStmt->bindValue(':email', $this->getEmail(), PDO::PARAM_STR);
@@ -49,7 +49,6 @@ trait Register{
     
             $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
 
-            $connection = $database->getConnection();
             $query = 'INSERT INTO user(fname, lname, email, password, role) VALUES(:fname, :lname, :email, :password, :role)';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':fname', $this->fname, PDO::PARAM_STR);
