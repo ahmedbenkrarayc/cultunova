@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/Database.php';
 require_once __DIR__.'/../exceptions/InputException.php';
+require_once __DIR__.'/../utils/Logger.php';
 
 class Category{
     private $id;
@@ -84,7 +85,7 @@ class Category{
             array_push($this->errors, 'Something went wrong !');
             return false;
         }catch(PDOException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return false;
         }
@@ -119,7 +120,7 @@ class Category{
             array_push($this->errors, 'Something went wrong !');
             return false;
         }catch(PDOException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return false;
         }
@@ -143,7 +144,7 @@ class Category{
             array_push($this->errors, 'Something went wrong !');
             return false;
         }catch(PDOException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return false;
         }
@@ -157,7 +158,7 @@ class Category{
             $stmt->execute();
             return $stmt->fetchAll();
         }catch(PDOException $e){
-            echo $e->getMessage();
+            Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return null;
         }
