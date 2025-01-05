@@ -187,4 +187,23 @@ class User{
     
         return false;
     }
+
+    public function getUser(){
+        try{
+            if($this->id == null){
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT * FROM user WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
 }
