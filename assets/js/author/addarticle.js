@@ -3,7 +3,7 @@ const form = document.getElementById('form')
 form.addEventListener('submit', (e) => {
     e.preventDefault()
     let title = document.getElementById('title').value
-    let cover = document.getElementById('cover').value
+    let cover = document.getElementById('cover')
     let category = document.getElementById('category').value
     let description = document.getElementById('description').value
     let content = document.getElementById('content').value
@@ -12,9 +12,12 @@ form.addEventListener('submit', (e) => {
         { type: "string", value: title, name: "Title", minChars: 3 },
         { type: "number", value: category, name: "Category" },
         { type: "string", value: description, name: "Description", minChars: 100 },
-        { type: "string", value: content, name: "Content", minChars: 200 },
-        { type: "image", value: cover, name: "Cover" }
+        { type: "string", value: content, name: "Content", minChars: 200 }
     ]
+
+    if(!cover.getAttribute('attrequired')){
+        formInputs.push({ type: "image", value: cover, name: "Cover" })
+    }
 
     const validation = window.validateForm(formInputs)
     if(!validation){
