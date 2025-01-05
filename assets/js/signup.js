@@ -17,7 +17,7 @@ form.addEventListener('submit', (e) => {
 
     const validation = window.validateForm(formInputs)
     if(!validation){
-        alert('hi')
+        form.submit()
     }else{
         document.getElementById('errors').style.display = 'block'
         document.getElementById('errors').firstElementChild.innerHTML = ''
