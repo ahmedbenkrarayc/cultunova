@@ -1,3 +1,24 @@
+<?php
+require_once './../../classes/Article.php';
+require_once './../../classes/User.php';
+if(!isset($_GET['id'])){
+    header('Location: ./../auth/login.php');
+}
+
+$user = new User($_GET['id'], null, null, null, null, null, null, null);
+$author = $user->getUser();
+if(!$author){
+    header('Location: ./../auth/login.php');
+}else{
+    if($author['role'] != 'author'){
+        header('Location: ./../auth/login.php');
+    }
+}
+
+$article = new Article(null, null, null, null, null, null, null, $_COOKIE['user_id'], null, null);
+$articles = $article->articleByAuthor() ?? [];
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -41,29 +62,23 @@
                                 </div>
                                 <div class="col">
                                     <h4 class="card-title m-0">
-                                    <a href="#">Paweł Kuna</a>
+                                    <a href="#"><?php echo $author['fname'].' '.$author['lname'] ?></a>
                                     </h4>
                                     <div class="text-secondary">
                                     Author
                                     </div>
                                 </div>
-                                <!-- <div class="col-auto">
-                                    <a href="#" class="btn btn-success">
-                                        Accept
-                                    </a>
-                                    <a href="#" class="btn btn-danger">
-                                        Reject
-                                    </a>
-                                </div> -->
                                 <div class="col-auto">
                                     <div class="dropdown">
                                     <a href="#" class="btn-action" data-bs-toggle="dropdown" aria-expanded="false">
                                         <!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
                                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
                                     </a>
+                                    <?php if($_COOKIE['user_role'] == 'admin'): ?>
                                     <div class="dropdown-menu dropdown-menu-end">
                                         <a href="#" class="dropdown-item text-danger">Delete account</a>
                                     </div>
+                                    <?php endif; ?>
                                     </div>
                                 </div>
                                 </div>
@@ -73,30 +88,34 @@
                     </div>
                     
                     <div class="row row-cards" style="margin-top:40px;">
+                        <?php foreach($articles as $item): ?>
                         <div class="col-sm-6 col-lg-4">
                             <div class="card card-sm">
-                            <a href="#" class="d-block"><img src="./../../static/photos/beautiful-blonde-woman-relaxing-with-a-can-of-coke-on-a-tree-stump-by-the-beach.jpg" class="card-img-top"></a>
-                            <div class="card-body">
-                                <div class="d-flex align-items-center" style="justify-content: space-between;">
-                                    <div>
-                                        <div>Paweł Kuna</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="dropdown">
-                                            <a href="#" class="btn-action" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end" style="">
-                                                <a href="#" class="dropdown-item">Edit</a>
-                                                <a href="#" class="dropdown-item text-danger">Delete</a>
+                                <a href="./article.php?id=<?php echo $item['id'] ?>" class="d-block"><img src="<?php echo $item['cover'] ?>" class="card-img-top"></a>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center" style="justify-content: space-between;">
+                                        <div>
+                                            <div><?php echo $item['title'] ?></div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <div class="dropdown">
+                                                <a href="#" class="btn-action" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
+                                                </a>
+                                                <?php if($_COOKIE['user_id'] == $_GET['id']): ?>
+                                                <div class="dropdown-menu dropdown-menu-end" style="">
+                                                    <a href="./editarticle.php?id=<?php echo $item['id'] ?>" class="dropdown-item">Edit</a>
+                                                    <a href="#" class="dropdown-item text-danger">Delete</a>
+                                                </div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            </div>
                         </div>
+                        <?php endforeach; ?>
                 </div>
             </div>
             <?php require_once './../../utils/__footer.php' ?>
