@@ -12,17 +12,17 @@ window.validateForm = (inputs) => {
         }
       }else if(type === "string"){
           if (typeof value != "string" || value.trim() === "") {
-              errors.push(`${name} must be a non-empty string.`)
-            }else if(minChars && value.trim().length < minChars) {
+            errors.push(`${name} must be a non-empty string.`)
+          }else if(minChars && value.trim().length < minChars) {
           errors.push(`${name} must have at least ${minChars} characters.`)
         }
       }else if(type === "number"){
-        if (isNaN(value)) {
+        if (isNaN(value) || value.trim() === ""){
           errors.push(`${name} must be a valid number.`)
         }
       }else if(type === 'range'){
         if(!range.includes(value.toLowerCase())){
-            errors.push(`${name} must be one of these values ${range.join(', ')}.`)
+          errors.push(`${name} must be one of these values ${range.join(', ')}.`)
         }
       }else if(type === "image"){
         if(!value){
