@@ -1,3 +1,17 @@
+<?php 
+require_once './../../classes/Category.php';
+$category = new Category(null, null, null, null);
+$categories = $category->categoryList() ?? [] ;
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+  if(isset($_POST['id'])){
+    $category = new Category($_POST['id'], null, null, null);
+    $category->delete();
+    header('Location: '.$_SERVER['PHP_SELF']);
+  }
+}
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -56,16 +70,21 @@
                       </tr>
                     </thead>
                     <tbody class="table-tbody">
+                      <?php foreach($categories as $index => $item ): ?>
                       <tr>
-                        <td class="sort-name">1</td>
-                        <td class="sort-city">Cedar Point</td>
-                        <td class="sort-type">RMC Hybrid</td>
-                        <td class="sort-score">100,0%</td>
+                        <td class="sort-name"><?php echo $index+1 ?></td>
+                        <td class="sort-city"><?php echo $item['name'] ?></td>
+                        <td class="sort-type"><?php echo explode(' ',$item['createdAt'])[0] ?></td>
+                        <td class="sort-score"><?php echo explode(' ', $item['updatedAt'])[0] ?></td>
                         <td class="sort-date">
-                            <a href="#">edit</a>
-                            <a href="#" style="color:red;">delete</a>
+                            <a href="./editcategory.php?id=<?php echo $item['id'] ?>">edit</a>
+                            <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" style="display: inline;">
+                              <input type="hidden" name="id" value="<?php echo $item['id'] ?>">
+                              <button type="submit" style="color:red; background:transparent; border:none;">delete</button>
+                            </form>
                         </td>
                       </tr>
+                      <?php endforeach; ?>
                     </tbody>
                   </table>
                 </div>
