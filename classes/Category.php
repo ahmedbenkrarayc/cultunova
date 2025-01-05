@@ -163,4 +163,19 @@ class Category{
             return null;
         }
     }
+
+    public function categoryById(){
+        try{
+            $connection = $this->database->getConnection();
+            $query = 'select * from category where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
 }
