@@ -74,15 +74,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" id="form">
               <div class="mb-3">
                 <label class="form-label">First name</label>
-                <input type="text" id="fname" class="form-control" placeholder="first name" name="fname">
+                <input type="text" id="fname" class="form-control" placeholder="first name" name="fname" value="<?php echo isset($_POST['fname']) ? $_POST['fname'] : '' ?>">
               </div>
               <div class="mb-3">
                 <label class="form-label">Last name</label>
-                <input type="text" class="form-control" placeholder="last name" name="lname" id="lname">
+                <input type="text" class="form-control" placeholder="last name" name="lname" id="lname" value="<?php echo isset($_POST['lname']) ? $_POST['lname'] : '' ?>">
               </div>
               <div class="mb-3">
                 <label class="form-label">Email address</label>
-                <input type="email" class="form-control" placeholder="your@email.com" name="email" id="email">
+                <input type="email" class="form-control" placeholder="your@email.com" name="email" id="email" value="<?php echo isset($_POST['email']) ? $_POST['email'] : '' ?>">
               </div>
               <div class="mb-2">
                 <label class="form-label">Password</label>
@@ -108,10 +108,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         </div>
       </div>
     </div>
-    <!-- Libs JS -->
-    <!-- Tabler Core -->
     <script src="./../../assets/js/validation.js"></script>
     <script src="./../../assets/js/signup.js"></script>
+    <!-- Tabler Core -->
     <script src="./../../dist/js/tabler.min.js?1692870487" defer></script>
     <script src="./../../dist/js/demo.min.js?1692870487" defer></script>
   </body>
