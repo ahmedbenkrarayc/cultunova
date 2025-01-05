@@ -1,3 +1,32 @@
+<?php 
+require_once './../../classes/Visitor.php';
+require_once './../../classes/Author.php';
+require_once './../../exceptions/InputException.php';
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+  if($_POST['role'] == 'visitor'){
+    $user = new Visitor(null, $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['password'], null, null);
+  }else{
+    $user = new Author(null, $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['password'], null, null, null, null, null);
+  }
+
+  $errors = $user->getErrors();
+  if(count($errors) == 0){
+    try{
+      $result = $user->register();
+      if(!$result['success']){
+        $errors = $result['errors'];
+      }else{
+        header('Location: ./login.php');
+      }
+    }catch(InputException $e){
+      $errors[] = $e->getMessage();
+    }
+  }
+}
+
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -26,14 +55,23 @@
     <div class="page page-center">
       <div class="container container-tight py-4">
           <div id="errors" class="alert alert-danger" role="alert" style="background: white; display: none;">
+              <ul></ul>
+          </div>
+          <?php if(isset($errors) && count($errors) > 0): ?>
+          <div class="alert alert-danger" role="alert" style="background: white;">
               <ul>
-                
+                <?php
+                  foreach($errors as $error){
+                    echo '<li>'.$error.'</li>';
+                  }
+                ?>
               </ul>
           </div>
+          <?php endif; ?>
         <div class="card card-md">
           <div class="card-body">
             <h2 class="h2 text-center mb-4">Create new account</h2>
-            <form action="" method="post" id="form">
+            <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" id="form">
               <div class="mb-3">
                 <label class="form-label">First name</label>
                 <input type="text" id="fname" class="form-control" placeholder="first name" name="fname">
