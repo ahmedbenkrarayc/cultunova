@@ -354,7 +354,7 @@ class Article {
             $connection = $this->database->getConnection();
             $query = 'SELECT * FROM article WHERE author_id = :author_id';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':author_id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->bindValue(':author_id', htmlspecialchars($this->author_id), PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
         }catch(PDOException $e){
