@@ -9,6 +9,7 @@ class Tag{
     private $createdAt;
     private $updatedAt;
     private $errors = [];
+    private $database;
 
     public function __construct($id, $name, $createdAt = null, $updatedAt = null){
         try{
@@ -65,5 +66,117 @@ class Tag{
                 throw new InputException('Tag name should at least contain 3 characters !');
         }
         $this->name = $name;
+    }
+
+    //methods
+    public function create(){
+        try{
+            if($this->name == null){
+                array_push($this->errors, 'Tag name is required !');
+                return false;
+            }
+            $connection =  $this->database->getConnection();
+            $query = 'insert into tag(name) values(:name)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':name', htmlspecialchars($this->name), PDO::PARAM_STR);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
+
+    public function update(){
+        try{
+            $nullvalue = false;
+
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->name == null){
+                array_push($this->errors, 'Tag name is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = $this->database->getConnection();
+            $query = 'update tag set name = :name where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':name', htmlspecialchars($this->name), PDO::PARAM_STR);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
+
+    public function delete(){
+        try{
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'delete from tag where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
+
+    public function tagList(){
+        try{
+            $connection = $this->database->getConnection();
+            $query = 'select * from tag';
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
+
+    public function tagById(){
+        try{
+            $connection = $this->database->getConnection();
+            $query = 'select * from tag where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
     }
 }
