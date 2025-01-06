@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__.'/Database.php';
+require_once __DIR__.'/../exceptions/InputException.php';
+require_once __DIR__.'/../utils/Logger.php';
 
 class Tag{
     private $id;
