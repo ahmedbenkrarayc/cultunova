@@ -98,7 +98,7 @@ class Like{
         }
     }
 
-    public function detachArticleTag(){
+    public function unlikeArticle(){
         try{
             if($this->article_id == null){
                 array_push($this->errors, 'Article id is required !');
