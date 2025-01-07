@@ -127,4 +127,24 @@ class ArticleTag{
             return false;
         }
     }
+
+    public function tagsOfArticle(){
+        try{
+            if($this->article_id == null){
+                array_push($this->errors, 'Article id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT t.* from article a, articletag t WHERE a.id = t.article_id and a.id = :article_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
 }
