@@ -13,7 +13,7 @@ class Like{
     private $errors = [];
     private $database;
 
-    public function __construct($article_id, $visitor_id, $createdAt = null, $updatedAt = null){
+    public function __construct($id, $article_id, $visitor_id, $content, $createdAt = null, $updatedAt = null){
         try{
             $this->setArticleId($article_id);
             $this->setVisitor($visitor_id);
