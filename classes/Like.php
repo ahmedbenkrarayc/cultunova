@@ -6,6 +6,8 @@ require_once __DIR__.'/../utils/Logger.php';
 class Like{
     private $article_id;
     private $visitor_id;
+    private $createdAt;
+    private $updatedAt;
     private $errors = [];
     private $database;
 
