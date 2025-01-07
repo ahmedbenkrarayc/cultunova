@@ -3,16 +3,16 @@ require_once __DIR__.'/Database.php';
 require_once __DIR__.'/../exceptions/InputException.php';
 require_once __DIR__.'/../utils/Logger.php';
 
-class ArticleTag{
+class Like{
     private $article_id;
-    private $tag_id;
+    private $visitor_id;
     private $errors = [];
     private $database;
 
-    public function __construct($article_id, $tag_id, $createdAt = null, $updatedAt = null){
+    public function __construct($article_id, $visitor_id, $createdAt = null, $updatedAt = null){
         try{
             $this->setArticleId($article_id);
-            $this->setTagId($tag_id);
+            $this->setVisitor($visitor_id);
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
             $this->database = new Database();
@@ -26,8 +26,8 @@ class ArticleTag{
         return $this->article_id;
     }
 
-    public function getTagId() {
-        return $this->tag_id;
+    public function getVisitorId() {
+        return $this->visitor_id;
     }
 
     public function getCreatedAt() {
@@ -56,35 +56,35 @@ class ArticleTag{
         $this->article_id = $article_id;
     }
 
-    public function setTagId($tag_id){
-        if($tag_id != null){
-            if(!filter_var($tag_id, FILTER_VALIDATE_INT))
-                throw new InputException('Tag id must be a number !');
+    public function setVisitorId($visitor_id){
+        if($visitor_id != null){
+            if(!filter_var($visitor_id, FILTER_VALIDATE_INT))
+                throw new InputException('Visitor id must be a number !');
 
-            if($tag_id < 1)
-                throw new InputException('Tag id must be a positive number greater than 0 !');
+            if($visitor_id < 1)
+                throw new InputException('Visitor id must be a positive number greater than 0 !');
         }
-        $this->tag_id = $tag_id;
+        $this->visitor_id = $visitor_id;
     }
 
     //methods
-    public function addArticleTag(){
+    public function likeArticle(){
         try{
             if($this->article_id == null){
                 array_push($this->errors, 'Article id is required !');
                 return false;
             }
 
-            if($this->tag_id == null){
-                array_push($this->errors, 'Tag id is required !');
+            if($this->visitor_id == null){
+                array_push($this->errors, 'Visitor id is required !');
                 return false;
             }
 
             $connection =  $this->database->getConnection();
-            $query = 'insert into articletag(article_id, tag_id) values(:article_id, :tag_id)';
+            $query = 'insert into likes(article_id, visitor_id) values(:article_id, :visitor_id)';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
-            $stmt->bindValue(':tag_id', htmlspecialchars($this->tag_id), PDO::PARAM_INT);
+            $stmt->bindValue(':visitor_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
             if($stmt->execute()){
                 return true;
             }
@@ -105,16 +105,16 @@ class ArticleTag{
                 return false;
             }
 
-            if($this->tag_id == null){
-                array_push($this->errors, 'Tag id is required !');
+            if($this->visitor_id == null){
+                array_push($this->errors, 'Visitor id is required !');
                 return false;
             }
 
             $connection = $this->database->getConnection();
-            $query = 'delete from articletag where article_id = :article_id AND tag_id = :tag_id';
+            $query = 'delete from likes where article_id = :article_id AND visitor_id = :visitor_id';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
-            $stmt->bindValue(':tag_id', htmlspecialchars($this->tag_id), PDO::PARAM_INT);
+            $stmt->bindValue(':visitor_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
             if($stmt->execute()){
                 return true;
             }
