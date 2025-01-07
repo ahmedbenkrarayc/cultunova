@@ -127,4 +127,24 @@ class Like{
             return false;
         }
     }
+
+    public function favoriteByVisitor(){
+        try{
+            if($this->visitor_id == null){
+                array_push($this->errors, 'Visitor id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT a.* FROM article a, likes l WHERE a.id = l.article_id AND l.visitor_id = :visitor_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':visitor_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
 }
