@@ -1,3 +1,9 @@
+<?php
+require_once './../../classes/Category.php';
+$category = new Category(null, null, null, null);
+$categories = $category->categoryList() ?? [] ;
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -51,6 +57,9 @@
                   <div class="mb-2">
                     <select name="" class="form-select">
                       <option value="">All</option>
+                      <?php foreach($categories as $category): ?>
+                        <option value="<?php echo $category['id'] ?>"><?php echo $category['name'] ?></option>
+                      <?php endforeach; ?>
                     </select>
                   </div>
                   <div class="mt-5">
@@ -64,8 +73,9 @@
                 </form>
               </div>
               <div class="col-9">
-                <div class="row row-cards">
-                  <div class="col-sm-6 col-lg-4">
+                <div class="row row-cards" id="articlesContainer">
+
+                  <!-- <div class="col-sm-6 col-lg-4">
                     <div class="card card-sm">
                       <a href="#" class="d-block"><img src="./../../static/photos/beautiful-blonde-woman-relaxing-with-a-can-of-coke-on-a-tree-stump-by-the-beach.jpg" class="card-img-top"></a>
                       <div class="card-body">
@@ -77,7 +87,8 @@
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> -->
+
                 </div>
               </div>
             </div>
@@ -85,6 +96,7 @@
         </div>
         <?php require_once './../../utils/__footer.php' ?>
       </div>
+      <script src="./../../assets/js/visitor/home.js"></script>
     <!-- Libs JS -->
     <script src="./../../dist/libs/list.js/dist/list.min.js?1692870487" defer></script>
     <!-- Tabler Core -->
