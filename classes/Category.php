@@ -9,6 +9,7 @@ class Category{
     private $createdAt;
     private $updatedAt;
     private $errors = [];
+    private $database;
 
     public function __construct($id, $name, $createdAt, $updatedAt){
         try{
