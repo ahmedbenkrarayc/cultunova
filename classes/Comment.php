@@ -158,4 +158,24 @@ class Comment{
             return false;
         }
     }
+
+    public function articleComments(){
+        try{
+            if($this->article_id == null){
+                array_push($this->errors, 'Article id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT a.* FROM article a, comment c WHERE a.id = c.article_id AND c.article_id = :article_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':article_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
 }
