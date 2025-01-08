@@ -3,7 +3,7 @@ require_once __DIR__.'/Database.php';
 require_once __DIR__.'/../exceptions/InputException.php';
 require_once __DIR__.'/../utils/Logger.php';
 
-class Like{
+class Comment{
     private $id;
     private $article_id;
     private $visitor_id;
@@ -99,5 +99,39 @@ class Like{
     }
 
     //methods
-    
+    public function create(){
+        try{
+            if($this->article_id == null){
+                array_push($this->errors, 'Article id is required !');
+                return false;
+            }
+
+            if($this->visitor_id == null){
+                array_push($this->errors, 'Visitor id is required !');
+                return false;
+            }
+
+            if($this->content == null){
+                array_push($this->errors, 'Comment is required !');
+                return false;
+            }
+
+            $connection =  $this->database->getConnection();
+            $query = 'insert into comment(article_id, visitor_id, content) values(:article_id, :visitor_id, :content)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
+            $stmt->bindValue(':visitor_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
+            $stmt->bindValue(':content', htmlspecialchars($this->content), PDO::PARAM_STR);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(InputException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
 }
