@@ -70,14 +70,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                       </tr>
                     </thead>
                     <tbody class="table-tbody">
-                      <?php foreach($categories as $index => $item ): ?>
+                      <?php foreach($tags as $index => $item ): ?>
                       <tr>
                         <td class="sort-name"><?php echo $index+1 ?></td>
                         <td class="sort-city"><?php echo $item['name'] ?></td>
                         <td class="sort-type"><?php echo explode(' ',$item['createdAt'])[0] ?></td>
                         <td class="sort-score"><?php echo explode(' ', $item['updatedAt'])[0] ?></td>
                         <td class="sort-date">
-                            <a href="./editcategory.php?id=<?php echo $item['id'] ?>">edit</a>
+                            <a href="./edittag.php?id=<?php echo $item['id'] ?>">edit</a>
                             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" style="display: inline;">
                               <input type="hidden" name="id" value="<?php echo $item['id'] ?>">
                               <button type="submit" style="color:red; background:transparent; border:none;">delete</button>

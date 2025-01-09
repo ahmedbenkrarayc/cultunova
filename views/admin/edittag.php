@@ -12,7 +12,7 @@ if(count($tag->getErrors()) > 0 || $current == null){
 }
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-    $tag = new TAg($_POST['id'], $_POST['name']);
+    $tag = new Tag($_POST['id'], $_POST['name']);
     $errors = $tag->getErrors();
     if(count($errors) == 0){
       try{

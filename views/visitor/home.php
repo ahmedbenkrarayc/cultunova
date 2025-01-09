@@ -48,15 +48,15 @@ $categories = $category->categoryList() ?? [] ;
           <div class="container-xl">
             <div class="row g-4">
               <div class="col-3">
-                <form>
+                <form id="form">
                   <div class="subheader mb-2">Find article</div>
                   <div class="mb-2">
-                    <input type="text" placeholder="search ..." name="" class="form-control">
+                    <input type="text" placeholder="search ..." name="" class="form-control" id="keyword">
                   </div>
                   <div class="subheader mb-2">Category</div>
                   <div class="mb-2">
-                    <select name="" class="form-select">
-                      <option value="">All</option>
+                    <select name="" class="form-select" id="category">
+                      <option value="all">All</option>
                       <?php foreach($categories as $category): ?>
                         <option value="<?php echo $category['id'] ?>"><?php echo $category['name'] ?></option>
                       <?php endforeach; ?>
@@ -66,9 +66,9 @@ $categories = $category->categoryList() ?? [] ;
                     <button class="btn btn-primary w-100">
                       Search
                     </button>
-                    <a href="#" class="btn btn-link w-100">
+                    <button class="btn btn-link w-100" id="reset">
                       Reset to defaults
-                    </a>
+                    </button>
                   </div>
                 </form>
               </div>
@@ -90,6 +90,7 @@ $categories = $category->categoryList() ?? [] ;
                   </div> -->
 
                 </div>
+                <button id="showmore" style="background: black; color: white; border: none; outline: none; display: block; margin-inline:auto; padding:8px 16px;">Show more</button>
               </div>
             </div>
           </div>
