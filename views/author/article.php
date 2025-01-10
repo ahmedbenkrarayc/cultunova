@@ -25,6 +25,9 @@ if(!$currentArticle){
 $comment = new Comment(null, $currentArticle['id'], null, null);
 $comments = $comment->articleComments();
 
+$tagsArticle = new ArticleTag($_GET['id'] ,null);
+$allTags = $tagsArticle->tagsOfArticle() ?? [];
+
 $like = new Like($currentArticle['id'], $GLOBALS['authUser']['id']);
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
@@ -159,6 +162,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                                     </div>
                                     </div>
                                     <div class="text-secondary mb-3">
+                                        <div style="margin-bottom: 20px;">
+                                            <?php foreach($allTags as $item): ?>
+                                                <span class="badge bg-azure text-azure-fg"><?= $item['name'] ?></span>
+                                            <?php endforeach; ?>
+                                        </div>
                                         <?php echo $currentArticle['description'] ?>
                                     </div>
                                 </div>

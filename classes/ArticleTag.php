@@ -159,7 +159,7 @@ class ArticleTag{
             }
 
             $connection = $this->database->getConnection();
-            $query = 'SELECT t.* from article a, articletag t WHERE a.id = t.article_id and a.id = :article_id';
+            $query = 'SELECT t.* from tag t, articletag a WHERE a.tag_id = t.id and a.article_id = :article_id';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
             $stmt->execute();
