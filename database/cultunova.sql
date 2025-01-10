@@ -142,3 +142,38 @@ CREATE TABLE comment(
 	FOREIGN KEY(article_id) REFERENCES article(id) ON DELETE CASCADE,
 	FOREIGN KEY(visitor_id) REFERENCES user(id) ON DELETE CASCADE
 );
+
+CREATE VIEW most_liked_articles AS
+SELECT 
+    a.id AS article_id,
+    a.title AS article_title,
+    COUNT(l.article_id) AS likes_count,
+    c.name AS category_name
+FROM article a
+LEFT JOIN likes l ON a.id = l.article_id
+LEFT JOIN category c ON a.category_id = c.id
+GROUP BY a.id, a.title, c.name
+ORDER BY likes_count DESC;
+
+
+DELIMITER //
+
+CREATE PROCEDURE ban_user(IN userId INT)
+BEGIN
+    UPDATE author_details 
+    SET deleted = 1
+    WHERE author_id = userId;
+END //
+
+DELIMITER ;
+
+
+SELECT 
+    t.name AS tag_name,
+    COUNT(at.tag_id) AS associations_count
+FROM tag t
+JOIN articletag at ON t.id = at.tag_id
+JOIN article a ON at.article_id = a.id
+WHERE DATEDIFF(NOW(), a.createdAt) <= 30
+GROUP BY t.name
+ORDER BY associations_count DESC;
