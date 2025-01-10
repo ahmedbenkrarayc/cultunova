@@ -1,21 +1,32 @@
 <?php 
 require_once './../../classes/Category.php';
 require_once './../../exceptions/InputException.php';
+require_once './../../classes/User.php';
+require_once './../auth/user.php';
+require_once './../../utils/csrf.php';
+
+if(!User::verifyAuth('admin')){
+  header('Location: ./../auth/login.php');
+}
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-  $category = new Category(null, $_POST['name'], null, null);
-
-  $errors = $category->getErrors();
-  if(count($errors) == 0){
-    try{
-      if(!$category->create()){
-        $errors = $category->getErrors();
-      }else{
-        $success = true;
+  if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
+    $category = new Category(null, $_POST['name'], null, null);
+  
+    $errors = $category->getErrors();
+    if(count($errors) == 0){
+      try{
+        if(!$category->create()){
+          $errors = $category->getErrors();
+        }else{
+          $success = true;
+        }
+      }catch(InputException $e){
+        $errors[] = $e->getMessage();
       }
-    }catch(InputException $e){
-      $errors[] = $e->getMessage();
     }
+  }else{
+    die('Invalid CSRF token');
   }
 }
 ?>
@@ -68,6 +79,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
               <div class="alert alert-success" role="alert" style="background: white;">Created successfully</div>
             <?php endif; ?>
             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST" class="card" id="form">
+                <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
                 <div class="card-header">
                   <h3 class="card-title">Create category</h3>
                 </div>

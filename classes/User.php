@@ -174,15 +174,19 @@ class User{
         }
     }
 
-    public function logout(){
+    public static function logout(){
         setcookie('user_id', '', time() - 60 * 60, '/');
         setcookie('user_role', '', time() - 60 * 60, '/');
-        header('Location: '.$_SERVER['PHP_SELF']);
+        header('Location: ./login.php');
     }
 
-    public static function verifyAuth($role){
+    public static function verifyAuth($role = null){
         if(isset($_COOKIE['user_id']) && isset($_COOKIE['user_role'])){
-            return $_COOKIE['user_role'] == $role;
+            if($role != null){
+                return $_COOKIE['user_role'] == $role;
+            }else{
+                return true;
+            }
         }
     
         return false;
@@ -199,11 +203,77 @@ class User{
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetch();
+            $user =  $stmt->fetch();
+            if($user){
+                if($user['role'] == 'author'){
+                    $query = 'SELECT * FROM author_details WHERE author_id = :id';
+                    $checkStmt = $connection->prepare($query);
+                    $checkStmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+                    $checkStmt->execute();
+                    $author = $checkStmt->fetch();
+                    if($author){
+                        if($author['deleted'] == 1)
+                            return null;
+                        else
+                            $user = array_merge($user, $author);
+                    }
+                }
+                return $user;
+            }else{
+                return null;
+            }
         }catch(PDOException $e){
             Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return null;
+        }
+    }
+    
+    public function updateProfile(){
+        try{
+            $nullvalue = false;
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->fname == null){
+                array_push($this->errors, 'First name is required !');
+                $nullvalue = true;
+            }
+
+            if($this->lname == null){
+                array_push($this->errors, 'Last name is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = $this->database->getConnection();
+            $query = 'UPDATE user SET fname = :fname, lname = :lname '; 
+            if($this->password != null)
+                $query .= 'password = :password';
+            $query .= ' WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->bindValue(':fname', htmlspecialchars($this->fname), PDO::PARAM_STR);
+            $stmt->bindValue(':lname', htmlspecialchars($this->lname), PDO::PARAM_STR);
+            if($this->password != null){
+                $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
+                $stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+            }
+
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
         }
     }
 }

@@ -51,4 +51,84 @@ class Author extends User implements IRegistrable{
     public function setCover($cover){
         $this->cover = $cover;
     }
+
+    public function softDelete(){
+        try{
+            if($this->id == null){
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT * FROM author_details WHERE author_id = :id';
+            $checkStmt = $connection->prepare($query);
+            $checkStmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $checkStmt->execute();
+            if($checkStmt->fetch()){
+                $query = 'UPDATE author_details SET deleted = 1 WHERE author_id = :id';
+                $stmt = $connection->prepare($query);
+                $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+                if($stmt->execute()){
+                    return true;
+                }
+            }else{
+                $query = 'INSERT INTO author_details(author_id, picture, cover, deleted) values(:id, null, null, 1)';
+                $stmt = $connection->prepare($query);
+                $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+                if($stmt->execute()){
+                    return true;
+                }
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
+
+    public function updateProfile() {
+        try {
+            $result = parent::updateProfile();
+            if ($result) {
+                $connection = $this->database->getConnection();
+    
+                $query = 'SELECT * FROM author_details WHERE author_id = :id';
+                $checkStmt = $connection->prepare($query);
+                $checkStmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+                $checkStmt->execute();
+    
+                if ($checkStmt->fetch()) {
+                    $query = 'UPDATE author_details SET picture = :picture, cover = :cover WHERE author_id = :id';
+                    $stmt = $connection->prepare($query);
+                    $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+                    $stmt->bindValue(':picture', htmlspecialchars($this->picture), PDO::PARAM_STR);
+                    $stmt->bindValue(':cover', htmlspecialchars($this->cover), PDO::PARAM_STR);
+    
+                    if ($stmt->execute()) {
+                        return true;
+                    }
+                } else {
+                    $query = 'INSERT INTO author_details (author_id, picture, cover, deleted) VALUES (:id, :picture, :cover, 0)';
+                    $stmt = $connection->prepare($query);
+                    $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+                    $stmt->bindValue(':picture', $this->picture !== null ? htmlspecialchars($this->picture) : null, PDO::PARAM_STR);
+                    $stmt->bindValue(':cover', $this->cover !== null ? htmlspecialchars($this->cover) : null, PDO::PARAM_STR);
+    
+                    if ($stmt->execute()) {
+                        return true;
+                    }
+                }
+            }
+    
+            $this->errors[] = 'Something went wrong!';
+            return false;
+        } catch (PDOException $e) {
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong!';
+            return false;
+        }
+    }
+    
 }

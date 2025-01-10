@@ -1,5 +1,12 @@
 <?php 
 require_once './../../classes/Tag.php';
+require_once './../../classes/User.php';
+require_once './../auth/user.php';
+
+if(!User::verifyAuth('admin')){
+  header('Location: ./../auth/login.php');
+}
+
 $tag = new Tag(null, null);
 $tags = $tag->tagList() ?? [] ;
 

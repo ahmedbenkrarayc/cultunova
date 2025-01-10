@@ -13,11 +13,11 @@ class Like{
 
     public function __construct($article_id, $visitor_id, $createdAt = null, $updatedAt = null){
         try{
+            $this->database = new Database();
             $this->setArticleId($article_id);
-            $this->setVisitor($visitor_id);
+            $this->setVisitorId($visitor_id);
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
-            $this->database = new Database();
         }catch(InputException $e){
             array_push($this->errors, $e->getMessage());
         }
@@ -83,7 +83,7 @@ class Like{
             }
 
             $connection =  $this->database->getConnection();
-            $query = 'insert into likes(article_id, visitor_id) values(:article_id, :visitor_id)';
+            $query = 'INSERT INTO likes(article_id, visitor_id) values(:article_id, :visitor_id)';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
             $stmt->bindValue(':visitor_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
@@ -147,6 +147,56 @@ class Like{
             Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
             return null;
+        }
+    }
+
+    public function isLiked(){
+        try{
+            if($this->visitor_id == null){
+                array_push($this->errors, 'Visitor id is required !');
+                return false;
+            }
+
+            if($this->article_id == null){
+                array_push($this->errors, 'Article id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT COUNT(*) FROM likes WHERE article_id = :article_id AND visitor_id = :visitor_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
+            $stmt->bindValue(':visitor_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
+            $stmt->execute();
+            $count = $stmt->fetchColumn();
+            
+            return $count == 1;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
+
+    public function articleLikes(){
+        try{
+            if($this->article_id == null){
+                array_push($this->errors, 'Article id is required !');
+                return false;
+            }
+
+            $connection = $this->database->getConnection();
+            $query = 'SELECT COUNT(*) FROM likes WHERE article_id = :article_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
+            $stmt->execute();
+            $count = $stmt->fetchColumn();
+            
+            return $count;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return 0;
         }
     }
 }

@@ -28,12 +28,12 @@ const display = () => {
         articlesContainer.innerHTML += `
         <div class="col-sm-6 col-lg-4">
             <div class="card card-sm">
-                <a href="#" class="d-block"><img src="${item.cover}"></a>
+                <a href="./../author/article.php?id=${item.id}" class="d-block"><img src="${item.cover}"></a>
                 <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div>
                     <div>${item.title}</div>
-                    <div class="text-secondary">2025-01-01</div>
+                    <div class="text-secondary">${item.updatedAt.split(' ')[0]}</div>
                     </div>
                 </div>
                 </div>
@@ -52,9 +52,8 @@ const filter = () => {
         filteredData = filteredData.filter((item) => item.category_id == category.value)
     else
         filteredData = [...data]
-
     if(keyword.value.trim() != '')
-        filteredData = filteredData.filter((item) => item.title.toLowerCase().includes(keyword.value.toLowerCase()) || item.content.toLowerCase().includes(keyword.value.toLowerCase()) || item.description.toLowerCase().includes(keyword.value.toLowerCase()))
+        filteredData = filteredData.filter((item) => item.title.toLowerCase().includes(keyword.value.toLowerCase()) || item.content.toLowerCase().includes(keyword.value.toLowerCase()) || item.description.toLowerCase().includes(keyword.value.toLowerCase()) || (item.author_fname.toLowerCase()+' '+item.author_lname.toLowerCase()).includes(keyword.value.toLowerCase()))
 }
 
 const reset = () => {

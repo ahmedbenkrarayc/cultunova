@@ -1,5 +1,13 @@
 <?php 
 require_once './../../classes/Tag.php';
+require_once './../../classes/User.php';
+require_once './../auth/user.php';
+require_once './../../utils/csrf.php';
+
+if(!User::verifyAuth('admin')){
+  header('Location: ./../auth/login.php');
+}
+
 if(!isset($_GET['id'])){
     header('Location: ./tags.php');
 }
@@ -12,6 +20,7 @@ if(count($tag->getErrors()) > 0 || $current == null){
 }
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
+  if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
     $tag = new Tag($_POST['id'], $_POST['name']);
     $errors = $tag->getErrors();
     if(count($errors) == 0){
@@ -25,6 +34,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         $errors[] = $e->getMessage();
       }
     }
+  }else{
+    die('Invalid CSRF token');
+  }
 }
 ?>
 
@@ -73,6 +85,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
               </div>
             <?php endif; ?>
             <form action="<?php echo $_SERVER['PHP_SELF'].'?id='.$current['id'] ?>" method="POST" class="card" id="form">
+                <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
                 <div class="card-header">
                   <h3 class="card-title">Edit tag</h3>
                 </div>

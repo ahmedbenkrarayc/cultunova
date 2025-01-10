@@ -2,6 +2,7 @@
 require_once __DIR__.'/../classes/Database.php';
 require_once __DIR__.'/../classes/User.php';
 require_once __DIR__.'/../utils/Logger.php';
+require_once __DIR__.'/../classes/Mailer.php';
 
 trait Register{
     public function register(){
@@ -51,13 +52,51 @@ trait Register{
 
             $query = 'INSERT INTO user(fname, lname, email, password, role) VALUES(:fname, :lname, :email, :password, :role)';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':fname', $this->fname, PDO::PARAM_STR);
-            $stmt->bindValue(':lname', $this->lname, PDO::PARAM_STR);
-            $stmt->bindValue(':email', $this->email, PDO::PARAM_STR);
+            $stmt->bindValue(':fname', htmlspecialchars($this->fname), PDO::PARAM_STR);
+            $stmt->bindValue(':lname', htmlspecialchars($this->lname), PDO::PARAM_STR);
+            $stmt->bindValue(':email', htmlspecialchars($this->email), PDO::PARAM_STR);
             $stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
-            $stmt->bindValue(':role', $this->role, PDO::PARAM_STR);
+            $stmt->bindValue(':role', htmlspecialchars($this->role), PDO::PARAM_STR);
             
             if($stmt->execute()){
+                if($this->role == 'author'){
+                    $welcomeEmail = '
+                    <!DOCTYPE html>
+                    <html lang="fr">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Bienvenue</title>
+                    </head>
+                    <body style="font-family: Arial, sans-serif; color: #333; text-align: center; background-color: #f9f9f9; padding: 20px;">
+                        <h2 style="color: #444;">Bienvenue sur [Nom de la plateforme]</h2>
+                        <p>Bonjour,</p>
+                        <p>Nous sommes ravis de vous compter parmi nos auteurs. Partagez vos idées et inspirez notre communauté dès maintenant.</p>
+                        <a href="http://cultunova.local/" style="background-color: #007bff; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Publier un article</a>
+                        <p style="margin-top: 20px;">À bientôt,<br>L’équipe CultuNova</p>
+                    </body>
+                    </html>';
+                }else{
+                    $welcomeEmail = '
+                    <!DOCTYPE html>
+                    <html lang="fr">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Explorez</title>
+                    </head>
+                    <body style="font-family: Arial, sans-serif; color: #333; text-align: center; background-color: #f9f9f9; padding: 20px;">
+                        <h2 style="color: #444;">Explorez et Interagissez</h2>
+                        <p>Bonjour,</p>
+                        <p>Découvrez des articles inspirants, laissez des commentaires, et ajoutez vos favoris.</p>
+                        <a href="http://cultunova.local/" style="background-color: #007bff; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Commencer</a>
+                        <p style="margin-top: 20px;">L’équipe CultuNova</p>
+                    </body>
+                    </html>';
+                }
+
+                $mailer = new Mailer($this->fname.' '.$this->lname, htmlspecialchars($this->email), 'Welcome to cultunova', $welcomeEmail);
+                $mailer->send();
                 return ['success' => true, 'errors' => []];
             }
 

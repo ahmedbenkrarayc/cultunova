@@ -1,5 +1,12 @@
 <?php
 require_once './../../classes/Category.php';
+require_once './../../classes/User.php';
+require_once './../auth/user.php';
+
+if(!User::verifyAuth()){
+  header('Location: ./../auth/login.php');
+}
+
 $category = new Category(null, null, null, null);
 $categories = $category->categoryList() ?? [] ;
 ?>

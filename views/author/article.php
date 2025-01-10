@@ -1,10 +1,77 @@
+<?php
+require_once './../../classes/Article.php';
+require_once './../../classes/User.php';
+require_once './../../classes/Article.php';
+require_once './../../classes/Comment.php';
+require_once './../../classes/Like.php';
+require_once './../auth/user.php';
+
+if(!User::verifyAuth()){
+    header('Location: ./../auth/login.php');
+}
+
+if(!isset($_GET['id'])){
+    header('Location: ./../auth/login.php');
+}
+
+$article = new Article($_GET['id'], null, null, null, null, null, null, null, null, null);
+$currentArticle = $article->getOne();
+
+if(!$currentArticle){
+    header('Location: ./../visitor/home.php');
+}
+
+
+$comment = new Comment(null, $currentArticle['id'], null, null);
+$comments = $comment->articleComments();
+
+$like = new Like($currentArticle['id'], $GLOBALS['authUser']['id']);
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    if(isset($_POST['accept'])){
+        $article->setStatus('accepted');
+        $article->changeStatus();
+        header('Location: '.$_SERVER['PHP_SELF'].'?id='.$_GET['id']);
+    }
+
+    if(isset($_POST['reject'])){
+        $article->setStatus('rejected');
+        $article->changeStatus();
+    }
+
+    if(isset($_POST['download'])){
+        Article::generatePDF($currentArticle);
+    }
+
+    if(isset($_POST['comment'])){
+        $comment->setVisitorId($_POST['visitor_id']);
+        $comment->setArticleId($_POST['article_id']);
+        $comment->setContent($_POST['content']);
+
+        $comment->create();
+        header('Location: '.$_SERVER['PHP_SELF'].'?id='.$_GET['id']);
+    }
+
+    if(isset($_POST['like'])){
+        $like->likeArticle();
+        header('Location: '.$_SERVER['PHP_SELF'].'?id='.$_GET['id']);
+    }
+
+    if(isset($_POST['unlike'])){
+        $like->unlikeArticle();
+        header('Location: '.$_SERVER['PHP_SELF'].'?id='.$_GET['id']);
+    }
+}
+
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Categories | Cultunova</title>
+    <title>Article | Cultunova</title>
     <!-- CSS files -->
     <link href="./../../dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
     <link href="./../../dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
@@ -33,27 +100,38 @@
                     <div class="row row-cards">
                         <div class="col-md-12">
                             <div class="card">
-                            <img style="height: 200px; object-fit: cover;" src="https://images.unsplash.com/photo-1730119986244-eb33b57b3950?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
+                            <img style="height: 200px; object-fit: cover;" src="<?php echo $currentArticle['cover'] ?>" alt="">
                             <div class="card-body">
                                 <div class="row g-2 align-items-center">
-                                <div class="col-auto">
-                                    <span class="avatar avatar-lg" style="background-image: url(./static/avatars/000m.jpg)"></span>
-                                </div>
                                 <div class="col">
                                     <h4 class="card-title m-0">
-                                    <a href="#">Paweł Kuna</a>
+                                    <a href="./profile.php?id=<?php echo $currentArticle['author_id'] ?>"><?php echo $currentArticle['fname'].' '.$currentArticle['lname'] ?></a>
                                     </h4>
                                     <div class="text-secondary">
-                                    Author
+                                        <?php echo $like->articleLikes().' likes' ?>
                                     </div>
                                 </div>
                                 <div class="col-auto">
-                                    <a href="#" class="btn btn-success">
-                                        Accept
-                                    </a>
-                                    <a href="#" class="btn btn-danger">
-                                        Reject
-                                    </a>
+                                    <?php if($GLOBALS['authUser']['role'] == 'visitor'): ?>
+                                        <form style="display: inline;" action="" method="post">
+                                            <?php if($like->isLiked()): ?>
+                                                <button type="submit" name="unlike" class="btn btn-primary">Unlike</button>
+                                            <?php else: ?>
+                                                <button type="submit" name="like" class="btn btn-outline-primary">Like</button>
+                                            <?php endif; ?>
+                                        </form>
+                                    <?php endif; ?>
+                                    <form style="display: inline;" action="" method="post">
+                                        <button type="submit" name="download" class="btn btn-info">Download PDF</button>
+                                    </form>
+                                    <?php if($GLOBALS['authUser']['role'] == 'admin' && $currentArticle['status'] == 'in review'): ?>
+                                    <form style="display: inline;" action="" method="post">
+                                        <button type="submit" name="accept" class="btn btn-success">Accept</button>
+                                    </form>
+                                    <form style="display: inline;" action="" method="post">
+                                        <button type="submit" name="reject" class="btn btn-danger">Reject</button>
+                                    </form>
+                                    <?php endif; ?>
                                 </div>
                                 </div>
                             </div>
@@ -63,34 +141,9 @@
                     <div class="row row-cards" style="margin-top: 20px;">
                         <div class="col-lg-8">
                             <div class="card card-lg">
-                            <div class="card-body">
-                                <div class="markdown">
-                                <p>This is a legal agreement between you, the Purchaser, and Tabler. Purchasing or downloading of any Tabler product (Tabler Free, Tabler PRO, Tabler Email), constitutes your acceptance of the terms of this license, <a href="https://tabler.io/terms-of-service.html">Tabler terms of service</a> and <a href="https://tabler.io/privacy-policy.html">Tabler private policy</a>.</p>
-                                <p>A license grants you a non-exclusive and non-transferable right to use and incorporate the item in your personal or commercial projects.</p>
-                                <h3 id="tabler-free-license">Tabler Free License</h3>
-                                <p>Tabler Free is available under MIT License</p>
-                                <p>Copyright 2023 Tabler</p>
-                                <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
-                                <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
-                                <p>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
-                                <h3 id="tabler-pro-and-tabler-email-license">Tabler PRO and Tabler Email License</h3>
-                                <p>After Purchasing you are granted the use products under the conditions featured belowed.</p>
-                                <p>Rights</p>
-                                <ol>
-                                    <li>You have rights to use our resources for any or all of your personal and commercial projects.</li>
-                                    <li>You may modify the resources according to your requirements.</li>
-                                    <li>You are not required to attribute or link to Tabler in any of your projects.</li>
-                                </ol>
-                                <p>Restrictions</p>
-                                <ol>
-                                    <li>You do not have the rights to redistribute, resell, lease, license, sub-license or offer the file downloaded to any third party.</li>
-                                    <li>For any resalable web applications or software programs, you cannot include our graphic resources as an additional attachment.</li>
-                                    <li>You cannot redistribute any of the software, or products created with Tabler paid  products.</li>
-                                    <li>You cannot add our source code to any open source repository.</li>
-                                    <li>The source code may not be placed on any website in a complete or archived downloadable format.</li>
-                                </ol>
+                                <div class="card-body">
+                                    <?php echo $currentArticle['content'] ?>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         <div class="col-lg-4">
@@ -102,18 +155,43 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-md" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 20l10 0" /><path d="M6 6l6 -1l6 1" /><path d="M12 3l0 17" /><path d="M9 12l-3 -6l-3 6a3 3 0 0 0 6 0" /><path d="M21 12l-3 -6l-3 6a3 3 0 0 0 6 0" /></svg>
                                     </div>
                                     <div>
-                                        <h3 class="lh-1">Title</h3>
+                                        <h3 class="lh-1"><?php echo $currentArticle['title'] ?></h3>
                                     </div>
                                     </div>
                                     <div class="text-secondary mb-3">
-                                    A short and simple permissive license with conditions only requiring preservation of copyright and
-                                    license notices. Licensed works, modifications, and larger works may be distributed under different terms
-                                    and without source code.
+                                        <?php echo $currentArticle['description'] ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <?php if($GLOBALS['authUser']['role'] != 'admin'): ?>
+                        <div class="col-lg-8">
+                            <div class="card card-lg">
+                                <div class="card-body">
+                                    <h1 class="lh-1">Comments</h1>
+                                    <?php if($GLOBALS['authUser']['role'] == 'visitor'): ?>
+                                    <form action="" method="post">
+                                        <input type="hidden" name="visitor_id" value="<?php echo $GLOBALS['authUser']['id'] ?>">
+                                        <input type="hidden" name="article_id" value="<?php echo $currentArticle['id'] ?>">
+                                        <div class="mb-3">
+                                            <textarea class="form-control" name="content" rows="6" placeholder="Write a comment ..."></textarea>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" name="comment" class="btn btn-primary">Comment</button>
+                                        </div>
+                                    </form>
+                                    <?php endif; ?>
+                                    <?php foreach($comments as $item): ?>
+                                    <div class="card-body mt-4">
+                                        <h3 class="card-title"><?php echo $item['fname'].' '.$item['lname'] ?></h3>
+                                        <p class="card-subtitle"><?php echo $item['comment'] ?></p>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
                         </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             <?php require_once './../../utils/__footer.php' ?>
             </div>

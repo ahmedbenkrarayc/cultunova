@@ -1,7 +1,12 @@
 <?php
 require_once __DIR__.'/Database.php';
+require_once __DIR__.'/ArticleTag.php';
 require_once __DIR__.'/../exceptions/InputException.php';
 require_once __DIR__.'/../utils/Logger.php';
+require __DIR__.'/../vendor/autoload.php';
+
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class Article {
     private $id;
@@ -14,10 +19,11 @@ class Article {
     private $author_id;
     private $createdAt;
     private $updatedAt;
+    private $articleTag;
     private $database;
     private $errors = [];
 
-    public function __construct($id, $title, $description, $content, $cover, $status, $category, $author, $createdAt, $updatedAt){
+    public function __construct($id, $title, $description, $content, $cover, $status, $category, $author, $createdAt, $updatedAt, $articleTag = null){
         try{
             $this->setId($id);
             $this->setTitle($title);
@@ -158,7 +164,7 @@ class Article {
     }
 
     //methods
-    public function create(){
+    public function create($tags){
         try{
             $nullvalue = false;
             if($this->title == null){
@@ -204,6 +210,11 @@ class Article {
             $stmt->bindValue(':category_id', htmlspecialchars($this->category_id), PDO::PARAM_INT);
             $stmt->bindValue(':author_id', htmlspecialchars($this->author_id), PDO::PARAM_INT);
             if($stmt->execute()){
+                $lastId = $connection->lastInsertId();
+                foreach($tags as $item){
+                    $tag = new ArticleTag($lastId, $item);
+                    $tag->addArticleTag();
+                }
                 return true;
             }
 
@@ -216,7 +227,7 @@ class Article {
         }
     }
 
-    public function update(){
+    public function update($tags){
         try{
             $nullvalue = false;
             if($this->id == null){
@@ -274,6 +285,46 @@ class Article {
             $stmt->bindValue(':author_id', htmlspecialchars($this->author_id), PDO::PARAM_INT);
             $stmt->bindValue(':status', htmlspecialchars($this->status), PDO::PARAM_STR);
             if($stmt->execute()){
+                $tag = new ArticleTag($this->id, null);
+                $tag->detachAllArticleTags();
+                foreach($tags as $item){
+                    $tag = new ArticleTag($this->id, $item);
+                    $tag->addArticleTag();
+                }
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
+
+    public function changeStatus(){
+        try{
+            $nullvalue = false;
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->status == null){
+                array_push($this->errors, 'Status is required !');
+                $nullvalue = true;
+            }
+            
+            if($nullvalue)
+                return false;
+
+            $connection = $this->database->getConnection();
+            $query = 'UPDATE article SET status = :status WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->bindValue(':status', htmlspecialchars($this->status), PDO::PARAM_STR);
+            if($stmt->execute()){
                 return true;
             }
 
@@ -313,7 +364,7 @@ class Article {
     public function getAll(){
         try{
             $connection = $this->database->getConnection();
-            $query = 'SELECT * FROM article';
+            $query = 'SELECT a.*, u.fname AS author_fname, u.lname AS author_lname FROM article a LEFT JOIN user u ON a.author_id = u.id LEFT JOIN author_details ad ON a.author_id = ad.author_id WHERE ad.author_id IS NULL OR ad.deleted = 0;';
             $stmt = $connection->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -332,7 +383,7 @@ class Article {
             }
 
             $connection = $this->database->getConnection();
-            $query = 'SELECT * FROM article WHERE id = :id';
+            $query = 'SELECT a.*, u.fname, u.lname FROM article a INNER JOIN user u ON a.author_id = u.id LEFT JOIN author_details ad ON a.author_id = ad.author_id WHERE (ad.author_id IS NULL OR ad.deleted = 0) AND a.id = :id';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             $stmt->execute();
@@ -363,4 +414,90 @@ class Article {
             return null;
         }
     }
+
+    public static function generatePDF($article){
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
+
+        $html = "
+        <!DOCTYPE html>
+        <html lang='en'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Article PDF</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    margin: 20px;
+                    padding: 0;
+                    color: #333;
+                }
+                .container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                header h1 {
+                    font-size: 24px;
+                    margin: 0;
+                    color: #0056b3;
+                }
+                header p {
+                    font-size: 14px;
+                    color: #555;
+                }
+                .author {
+                    margin-top: 10px;
+                    font-style: italic;
+                    color: #666;
+                }
+                .description {
+                    font-size: 16px;
+                    margin: 20px 0;
+                    padding: 10px;
+                    background-color: #f9f9f9;
+                    border-left: 4px solid #0056b3;
+                }
+                article {
+                    font-size: 14px;
+                    line-height: 1.8;
+                }
+                footer {
+                    margin-top: 40px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #888;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <header>
+                    <h1>" . htmlspecialchars($article['title']) . "</h1>
+                    <p class='author'>By " . htmlspecialchars($article['fname']) . " " . htmlspecialchars($article['lname']) . "</p>
+                </header>
+                <section class='description'>
+                    <p>" . htmlspecialchars($article['description']) . "</p>
+                </section>
+                <article>
+                    " . nl2br(htmlspecialchars($article['content'])) . "
+                </article>
+            </div>
+        </body>
+        </html>
+        ";
+
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+        $dompdf->stream("article.pdf", ["Attachment" => 1]);
+    }
+
 }

@@ -1,31 +1,52 @@
 <?php 
 require_once './../../classes/Category.php';
+require_once './../../classes/Tag.php';
 require_once './../../classes/Article.php';
 require_once './../../exceptions/InputException.php';
+require_once './../../classes/User.php';
+require_once './../auth/user.php';
+require_once './../../utils/csrf.php';
+
+
+if(!User::verifyAuth('author')){
+  header('Location: ./../auth/login.php');
+}
 $category = new Category(null, null, null, null);
 $categories = $category->categoryList() ?? [] ;
 
+$tag = new Tag(null, null, null, null);
+$tags = $tag->tagList() ?? [] ;
+
+
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-  if(isset($_FILES['cover']) && $_FILES['cover']['error'] == 0){
-    $picName = 'image'.time().rand(1000, 9999).'.'.pathinfo($_FILES['cover']['name'], PATHINFO_EXTENSION);
-    move_uploaded_file($_FILES['cover']['tmp_name'], './../../assets/uploads/'.$picName);
-    $cover = '/assets/uploads/'.$picName;
-    $article = new Article(null, $_POST['title'], $_POST['description'], $_POST['content'], $cover, null, $_POST['category_id'], $_COOKIE['user_id'], null, null);
-  
-    $errors = $article->getErrors();
-    if(count($errors) == 0){
-      try{
-        if(!$article->create()){
-          $errors = $article->getErrors();
-        }else{
-          $success = true;
+  if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
+    if(!isset($_POST['tags'])){
+      $errors[] = 'You should at least choose a tag.';
+    }else{
+      if(isset($_FILES['cover']) && $_FILES['cover']['error'] == 0){
+        $picName = 'image'.time().rand(1000, 9999).'.'.pathinfo($_FILES['cover']['name'], PATHINFO_EXTENSION);
+        move_uploaded_file($_FILES['cover']['tmp_name'], './../../assets/uploads/'.$picName);
+        $cover = '/assets/uploads/'.$picName;
+        $article = new Article(null, $_POST['title'], $_POST['description'], $_POST['content'], $cover, null, $_POST['category_id'], $_COOKIE['user_id'], null, null);
+      
+        $errors = $article->getErrors();
+        if(count($errors) == 0){
+          try{
+            if(!$article->create($_POST['tags'])){
+              $errors = $article->getErrors();
+            }else{
+              $success = true;
+            }
+          }catch(InputException $e){
+            $errors[] = $e->getMessage();
+          }
         }
-      }catch(InputException $e){
-        $errors[] = $e->getMessage();
+      }else{
+        $errors[] = 'Cover is required.';
       }
     }
   }else{
-    $errors[] = 'Cover is required.';
+    die('Invalid CSRF token');
   }
 }
 ?>
@@ -78,6 +99,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
               <div class="alert alert-success" role="alert" style="background: white;">Created successfully</div>
             <?php endif; ?>
             <form action="" method="POST" id="form" class="card" enctype="multipart/form-data">
+                <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
                 <div class="card-header">
                   <h3 class="card-title">Create Article</h3>
                 </div>
@@ -99,8 +121,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                     <div>
                       <select class="form-select" name="category_id" id="category">
                         <option value="" disabled selected>Select a category</option>
-                        <?php foreach($categories as $category): ?>
-                          <option value="<?php echo $category['id'] ?>" ><?php echo $category['name'] ?></option>
+                        <?php foreach($categories as $item): ?>
+                          <option value="<?php echo $item['id'] ?>" ><?php echo $item['name'] ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label required">Tags</label>
+                    <div>
+                      <select class="form-select" name="tags[]" id="tags" multiple required>
+                        <?php foreach($tags as $item): ?>
+                          <option value="<?php echo $item['id'] ?>" ><?php echo $item['name'] ?></option>
                         <?php endforeach; ?>
                       </select>
                     </div>

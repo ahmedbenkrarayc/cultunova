@@ -2,26 +2,35 @@
 require_once './../../classes/Visitor.php';
 require_once './../../classes/Author.php';
 require_once './../../exceptions/InputException.php';
+require_once './../../utils/csrf.php';
+
+if(User::verifyAuth()){
+  header('Location: ./../user/settings.php');
+}
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-  if($_POST['role'] == 'visitor'){
-    $user = new Visitor(null, $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['password'], null, null);
-  }else{
-    $user = new Author(null, $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['password'], null, null, null, null, null);
-  }
-
-  $errors = $user->getErrors();
-  if(count($errors) == 0){
-    try{
-      $result = $user->register();
-      if(!$result['success']){
-        $errors = $result['errors'];
-      }else{
-        header('Location: ./login.php');
-      }
-    }catch(InputException $e){
-      $errors[] = $e->getMessage();
+  if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
+    if($_POST['role'] == 'visitor'){
+      $user = new Visitor(null, $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['password'], null, null);
+    }else{
+      $user = new Author(null, $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['password'], null, null, null, null, null);
     }
+
+    $errors = $user->getErrors();
+    if(count($errors) == 0){
+      try{
+        $result = $user->register();
+        if(!$result['success']){
+          $errors = $result['errors'];
+        }else{
+          header('Location: ./login.php');
+        }
+      }catch(InputException $e){
+        $errors[] = $e->getMessage();
+      }
+    }
+  }else{
+    die('Invalid CSRF token');
   }
 }
 
@@ -72,6 +81,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
           <div class="card-body">
             <h2 class="h2 text-center mb-4">Create new account</h2>
             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" id="form">
+              <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
               <div class="mb-3">
                 <label class="form-label">First name</label>
                 <input type="text" id="fname" class="form-control" placeholder="first name" name="fname" value="<?php echo isset($_POST['fname']) ? $_POST['fname'] : '' ?>">

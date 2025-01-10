@@ -16,7 +16,7 @@ class Comment{
     public function __construct($id, $article_id, $visitor_id, $content, $createdAt = null, $updatedAt = null){
         try{
             $this->setArticleId($article_id);
-            $this->setVisitor($visitor_id);
+            $this->setVisitorId($visitor_id);
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
             $this->database = new Database();
@@ -167,9 +167,9 @@ class Comment{
             }
 
             $connection = $this->database->getConnection();
-            $query = 'SELECT a.* FROM article a, comment c WHERE a.id = c.article_id AND c.article_id = :article_id';
+            $query = 'SELECT a.*, fname, lname, c.content as comment FROM article a, comment c, user u WHERE a.id = c.article_id AND u.id = c.id AND c.article_id = :article_id';
             $stmt = $connection->prepare($query);
-            $stmt->bindValue(':article_id', htmlspecialchars($this->visitor_id), PDO::PARAM_INT);
+            $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
         }catch(PDOException $e){

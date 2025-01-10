@@ -1,21 +1,30 @@
 <?php 
 require_once './../../classes/User.php';
 require_once './../../exceptions/InputException.php';
+require_once './../../utils/csrf.php';
+
+if(User::verifyAuth()){
+  header('Location: ./../user/settings.php');
+}
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-  $user = new User(null, null, null, $_POST['email'], $_POST['password'], null, null, null);
+  if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
+    $user = new User(null, null, null, $_POST['email'], $_POST['password'], null, null, null);
 
-  $errors = $user->getErrors();
-  if(count($errors) == 0){
-    try{
-      if(!$user->login()){
-        $errors = $user->getErrors();
-      }else{
-        header('Location: '.$_SERVER['PHP_SELF']);
+    $errors = $user->getErrors();
+    if(count($errors) == 0){
+      try{
+        if(!$user->login()){
+          $errors = $user->getErrors();
+        }else{
+          header('Location: '.$_SERVER['PHP_SELF']);
+        }
+      }catch(InputException $e){
+        $errors[] = $e->getMessage();
       }
-    }catch(InputException $e){
-      $errors[] = $e->getMessage();
     }
+  }else{
+    die('Invalid CSRF token');
   }
 }
 ?>
@@ -65,6 +74,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
           <div class="card-body">
             <h2 class="h2 text-center mb-4">Login to your account</h2>
             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" id="form">
+              <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
               <div class="mb-3">
                 <label class="form-label">Email address</label>
                 <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" value="<?php echo isset($_POST['email']) ? $_POST['email'] : '' ?>">

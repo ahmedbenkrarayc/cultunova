@@ -128,6 +128,29 @@ class ArticleTag{
         }
     }
 
+    public function detachAllArticleTags(){
+        try{
+            if($this->article_id == null){
+                array_push($this->errors, 'Article id is required !');
+                return false;
+            }
+            $connection = $this->database->getConnection();
+            $query = 'delete from articletag where article_id = :article_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':article_id', htmlspecialchars($this->article_id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
+    }
+
     public function tagsOfArticle(){
         try{
             if($this->article_id == null){

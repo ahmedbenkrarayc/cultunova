@@ -1,5 +1,12 @@
 <?php 
 require_once './../../classes/Article.php';
+require_once './../../classes/User.php';
+require_once './../auth/user.php';
+
+if(!User::verifyAuth('admin')){
+  header('Location: ./../auth/login.php');
+}
+
 $article = new Article(null, null, null, null, null, null, null, null, null, null);
 $articles = $article->getAll() ?? [] ;
 
