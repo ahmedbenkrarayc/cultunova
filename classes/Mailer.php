@@ -29,7 +29,7 @@ class Mailer{
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;           
             $mail->Port       = 587;                                      
         
-            $mail->setFrom("ahmed.benkrara12@gmail.com", 'cultunova');
+            $mail->setFrom($GLOBALS['mail'], $GLOBALS['appnoma']);
             $mail->addAddress($this->to, $this->username);
         
             $mail->isHTML(true);
